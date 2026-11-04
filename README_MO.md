@@ -1,17 +1,24 @@
-# EXAMM-MO: multi-objective EXAMM (validation MSE vs information ratio)
+# EXAMM-MO: multi-objective EXAMM (validation MSE vs information ratio, or vs portfolio return)
 
 A copy of the EXAMM-Extended source with one added option. `EXAMM-Extended` itself is not changed: its build,
 datasets, results and scripts are as they were. This folder reads the datasets from `EXAMM-Extended/datasets`
 and writes its own build, benchmark files and results here.
 
-## What `--objective mse_ir` does
+## What the options do
 
-| | Original EXAMM (`--objective mse`, the default) | `--objective mse_ir` |
-|---|---|---|
-| Genome scores | validation MSE | validation MSE **and** validation information ratio (IR) |
-| Island keeps / selects parents by | lowest MSE | Pareto rank on (lower MSE, higher IR), ties by crowding distance (NSGA-II) |
-| Island ranking for extinction | best MSE | best MSE (unchanged) |
-| Saved at the end | `global_best_genome_<id>.bin` (lowest MSE) | the same **plus** `pareto_genome_<id>.bin` + `pareto_front.csv` (global Pareto archive, up to `--pareto_archive_size`) |
+| | Original EXAMM (`--objective mse`, the default) | `--objective mse_ir` | `--objective mse_ret` |
+|---|---|---|---|
+| Genome scores | validation MSE | validation MSE **and** validation information ratio (IR) | validation MSE **and** validation portfolio return |
+| Island keeps / selects parents by | lowest MSE | Pareto rank on (lower MSE, higher IR), ties by crowding distance (NSGA-II) | Pareto rank on (lower MSE, higher return), same method |
+| Island ranking for extinction | best MSE | best MSE (unchanged) | best MSE (unchanged) |
+| Benchmark file | -- | `--ir_benchmark_file` (reversal strategy) | none |
+| Saved at the end | `global_best_genome_<id>.bin` (lowest MSE) | the same **plus** `pareto_genome_<id>.bin` + `pareto_front.csv` (`val_mse, val_ir`) | the same, `pareto_front.csv` has `val_mse, val_return` |
+| Job script / results | -- | `scripts/core7_examm_yearly_ret_mo.sh` -> `test_output/core7_examm_ret_mo_<Y>/` | `scripts/core7_examm_yearly_ret_mo_return.sh` -> `test_output/core7_examm_ret_mo_return_<Y>/` |
+
+**Portfolio return** (`mse_ret`): the same daily long-short 5/5 book as below; its annualized mean daily
+return (mean x 252), before costs, in EXAMM's normalized RET units (the raw return times one positive constant
+shared by all genomes, so genomes rank exactly as on raw returns; real % returns with costs come from the Mac
+backtest).
 
 **IR**, computed by each worker after training, at the weights EXAMM keeps (best validation MSE epoch):
 each validation day, long the 5 stocks with the highest forecast and short the 5 lowest; day return = mean
@@ -25,17 +32,19 @@ genome files. Multi-objective genome files are the original format plus a 12-byt
 
 ## Changed files (`git diff 5a1d9c5` shows every line)
 
-- `rnn/rnn_genome.hxx/.cxx`: `best_validation_ir`, `selection_score`, `get_validation_ir()`, `dominates()`,
+- `rnn/rnn_genome.hxx/.cxx`: `best_validation_obj2` (the second objective), `selection_score`,
+  `get_validation_book()`, `get_validation_ir()`, `get_validation_return()`, `get_validation_objective()`, `dominates()`,
   static multi-objective settings; IR computed at the end of `backpropagate_stochastic`; IR copied in `copy()`
   and carried in the binary format (needed for MPI: workers send genomes back to the master as bytes).
 - `examm/island.hxx/.cxx`: `insert_genome_multi_objective()`, `rank_pareto()`; best/worst island fitness = MSE.
 - `examm/island_speciation_strategy.hxx/.cxx`, `examm/speciation_strategy.hxx`: global Pareto archive,
   `save_pareto_archive()`.
 - `examm/examm.cxx`: saves the archive at the end of a run.
-- `mpi/examm_mpi.cxx`: options `--objective mse|mse_ir`, `--ir_benchmark_file`, `--ir_long_short_n` (5),
+- `mpi/examm_mpi.cxx`: options `--objective mse|mse_ir|mse_ret`, `--ir_benchmark_file` (mse_ir), `--ir_long_short_n` (5),
   `--pareto_archive_size` (50); every rank loads the benchmark.
 
 New files: `data_prep/write_core7_reversal_benchmark.py`, `scripts/core7_examm_yearly_ret_mo.sh`,
+`scripts/core7_examm_yearly_ret_mo_return.sh`,
 `scripts/select_core7_mo_candidates.py`, `scripts/evaluate_rnn_core7_ret_mo_cross.sh`.
 
 ## Workflow
@@ -47,10 +56,13 @@ New files: `data_prep/write_core7_reversal_benchmark.py`, `scripts/core7_examm_y
    -> `test_output/core7_examm_ret_mo_test_2022/set1/15/` (check `pareto_front.csv`, `fitness_log.csv`).
 4. **Full runs (needs approval: sbatch)**, 3 years x 4 sets x 10 repeats:
    `sbatch --array=1-4 --export=ALL,YEAR=<Y> scripts/core7_examm_yearly_ret_mo.sh` for Y = 2022, 2023, 2024.
+   MSE vs return: the same with `scripts/core7_examm_yearly_ret_mo_return.sh` (no benchmark needed).
 5. Candidates per fold: `python3 scripts/select_core7_mo_candidates.py --years 2022 2023 2024`
+   (MSE vs return: add `--name core7_examm_ret_mo_return`)
    (per source set, the non-dominated genomes of its 10 runs + each run's lowest-MSE genome).
 6. Mac: copy `test_output/core7_examm_ret_mo_<Y>/` into `~/EXAMM-Extended/test_output/`, then
-   `sh evaluate_rnn_core7_ret_mo_cross.sh` (every candidate on all 4 sets, val and test).
+   `sh evaluate_rnn_core7_ret_mo_cross.sh` (every candidate on all 4 sets, val and test;
+   MSE vs return: `RUN=core7_examm_ret_mo_return sh evaluate_rnn_core7_ret_mo_cross.sh`).
 7. Mac: genome frontier on the candidates (validation choice, test reported once) -- script to be written
    once the runs exist.
 
@@ -63,5 +75,9 @@ New files: `data_prep/write_core7_reversal_benchmark.py`, `scripts/core7_examm_y
 - Island of 10 fed 40 genomes: every globally non-dominated genome survives, order and structure map consistent.
 - Archive = exactly the non-dominated set; with a cap it keeps both ends of the front.
 - Candidate selection and evaluation scripts run on a mock folder (stand-in evaluate_rnn); reruns skip finished work.
+
+- MSE vs return: the C++ return objective matches Python (difference 2e-15); after adding it, the IR of the
+  test genome is unchanged (2.2757205131); the return survives the MPI round trip; `pareto_front.csv` names
+  its column `val_ir` or `val_return`; candidate selection reads both.
 
 Not yet checked: a real `mpirun` search (step 3).

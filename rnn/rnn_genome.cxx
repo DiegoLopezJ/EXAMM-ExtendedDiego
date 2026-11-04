@@ -2,6 +2,7 @@
 using std::sort;
 using std::upper_bound;
 
+#include <cstdint>
 #include <cstring>
 #include <numeric>
 
@@ -102,7 +103,7 @@ RNN_Genome::RNN_Genome(
 
     best_validation_mse = EXAMM_MAX_DOUBLE;
     best_validation_mae = EXAMM_MAX_DOUBLE;
-    best_validation_ir = -EXAMM_MAX_DOUBLE;
+    best_validation_obj2 = -EXAMM_MAX_DOUBLE;
     selection_score = 0.0;
 
     nodes = _nodes;
@@ -201,7 +202,7 @@ RNN_Genome* RNN_Genome::copy() {
 
     other->best_validation_mse = best_validation_mse;
     other->best_validation_mae = best_validation_mae;
-    other->best_validation_ir = best_validation_ir;
+    other->best_validation_obj2 = best_validation_obj2;
     other->selection_score = selection_score;
     other->best_parameters = best_parameters;
 
@@ -947,6 +948,7 @@ double RNN_Genome::get_best_validation_mae() const {
 
 // ---- multi-objective search (--objective mse_ir) ----
 bool RNN_Genome::multi_objective = false;
+string RNN_Genome::second_objective = "ir";
 vector<double> RNN_Genome::ir_benchmark;
 int32_t RNN_Genome::ir_long_short_n = 5;
 int32_t RNN_Genome::pareto_archive_size = 50;
@@ -955,46 +957,51 @@ void RNN_Genome::set_ir_benchmark(const vector<double>& benchmark, int32_t long_
     ir_benchmark = benchmark;
     ir_long_short_n = long_short_n;
     pareto_archive_size = archive_size;
+    second_objective = "ir";
     multi_objective = true;
 }
 
-double RNN_Genome::get_best_validation_ir() const {
-    return best_validation_ir;
+void RNN_Genome::set_return_objective(int32_t long_short_n, int32_t archive_size) {
+    ir_benchmark.clear();
+    ir_long_short_n = long_short_n;
+    pareto_archive_size = archive_size;
+    second_objective = "return";
+    multi_objective = true;
+}
+
+double RNN_Genome::get_best_validation_obj2() const {
+    return best_validation_obj2;
 }
 
 bool RNN_Genome::dominates(const RNN_Genome* other) const {
-    bool no_worse = best_validation_mse <= other->best_validation_mse && best_validation_ir >= other->best_validation_ir;
-    bool better = best_validation_mse < other->best_validation_mse || best_validation_ir > other->best_validation_ir;
+    bool no_worse = best_validation_mse <= other->best_validation_mse && best_validation_obj2 >= other->best_validation_obj2;
+    bool better = best_validation_mse < other->best_validation_mse || best_validation_obj2 > other->best_validation_obj2;
     return no_worse && better;
 }
 
 // Daily long-short book on the validation forecasts: each day t, long the ir_long_short_n series with the highest
 // forecast and short the ir_long_short_n with the lowest; the day's return is the mean realized (normalized) output of
 // the longs minus that of the shorts. All series share one normalization, so this is the raw long-short return up to
-// a positive scale factor, which the information ratio does not depend on. The book is regressed on the benchmark:
-// r_t = a + b * bench_t + e_t (OLS); IR = a / std(e) * sqrt(252). Returns -EXAMM_MAX_DOUBLE when undefined.
-double RNN_Genome::get_validation_ir(
+// a positive scale factor. Uses at most max_days days (max_days <= 0: every forecast day). Empty if undefined.
+vector<double> RNN_Genome::get_validation_book(
     const vector<double>& parameters, const vector<vector<vector<double> > >& inputs,
-    const vector<vector<vector<double> > >& outputs
+    const vector<vector<vector<double> > >& outputs, int32_t max_days
 ) {
     int32_t n_series = (int32_t) inputs.size();
-    if (ir_benchmark.empty() || n_series < 2 * ir_long_short_n) {
-        return -EXAMM_MAX_DOUBLE;
+    if (n_series < 2 * ir_long_short_n) {
+        return vector<double>();
     }
     vector<vector<double> > predictions = get_predictions(parameters, inputs, outputs);
 
-    int32_t n_days = (int32_t) ir_benchmark.size();
+    int32_t n_days = max_days > 0 ? max_days : INT32_MAX;
     for (int32_t i = 0; i < n_series; i++) {
         n_days = std::min(n_days, (int32_t) std::min(predictions[i].size(), outputs[i][0].size()));
     }
-    if (n_days != (int32_t) ir_benchmark.size()) {
-        Log::warning(
-            "information ratio: %d forecast days but %d benchmark days, using the first %d\n", n_days,
-            (int32_t) ir_benchmark.size(), n_days
-        );
+    if (max_days > 0 && n_days != max_days) {
+        Log::warning("long-short book: %d forecast days but %d benchmark days, using the first %d\n", n_days, max_days, n_days);
     }
     if (n_days < 3) {
-        return -EXAMM_MAX_DOUBLE;
+        return vector<double>();
     }
 
     vector<double> book(n_days);
@@ -1011,8 +1018,25 @@ double RNN_Genome::get_validation_ir(
         }
         book[t] = (longs - shorts) / ir_long_short_n;
         if (std::isnan(book[t]) || std::isinf(book[t])) {
-            return -EXAMM_MAX_DOUBLE;
+            return vector<double>();
         }
+    }
+    return book;
+}
+
+// Information ratio of the book against the benchmark: r_t = a + b * bench_t + e_t (OLS);
+// IR = a / std(e) * sqrt(252) (scale-free). Returns -EXAMM_MAX_DOUBLE when undefined.
+double RNN_Genome::get_validation_ir(
+    const vector<double>& parameters, const vector<vector<vector<double> > >& inputs,
+    const vector<vector<vector<double> > >& outputs
+) {
+    if (ir_benchmark.empty()) {
+        return -EXAMM_MAX_DOUBLE;
+    }
+    vector<double> book = get_validation_book(parameters, inputs, outputs, (int32_t) ir_benchmark.size());
+    int32_t n_days = (int32_t) book.size();
+    if (n_days < 3) {
+        return -EXAMM_MAX_DOUBLE;
     }
 
     double mean_r = 0.0, mean_b = 0.0;
@@ -1039,6 +1063,30 @@ double RNN_Genome::get_validation_ir(
         return -EXAMM_MAX_DOUBLE;
     }
     return alpha / sd_e * sqrt(252.0);
+}
+
+// Annualized mean daily return of the book (mean x 252), before costs, in normalized RET units: the raw
+// return times one positive constant shared by every genome, so genomes rank exactly as on raw returns.
+// Returns -EXAMM_MAX_DOUBLE when undefined.
+double RNN_Genome::get_validation_return(
+    const vector<double>& parameters, const vector<vector<vector<double> > >& inputs,
+    const vector<vector<vector<double> > >& outputs
+) {
+    vector<double> book = get_validation_book(parameters, inputs, outputs, 0);
+    if (book.size() < 3) {
+        return -EXAMM_MAX_DOUBLE;
+    }
+    return std::accumulate(book.begin(), book.end(), 0.0) / book.size() * 252.0;
+}
+
+double RNN_Genome::get_validation_objective(
+    const vector<double>& parameters, const vector<vector<vector<double> > >& inputs,
+    const vector<vector<vector<double> > >& outputs
+) {
+    if (second_objective == "return") {
+        return get_validation_return(parameters, inputs, outputs);
+    }
+    return get_validation_ir(parameters, inputs, outputs);
 }
 
 void RNN_Genome::set_generated_by(string type) {
@@ -1207,7 +1255,7 @@ void RNN_Genome::backpropagate_stochastic(
 ) {
     int32_t n_parameters = this->get_number_weights();
     int32_t n_series = (int32_t) inputs.size();
-    best_validation_ir = -EXAMM_MAX_DOUBLE;  // never carry a parent's IR over to this genome
+    best_validation_obj2 = -EXAMM_MAX_DOUBLE;  // never carry a parent's score over to this genome
 
     if (weight_decay > 0.0) {
         Log::info("weight_decay active: lambda=%.6f (applied each mini-batch update)\n", weight_decay);
@@ -1318,9 +1366,12 @@ void RNN_Genome::backpropagate_stochastic(
     delete rnn;
     this->set_weights(best_parameters);
     if (multi_objective) {
-        // IR of the weights EXAMM keeps (the epoch with the best validation MSE)
-        best_validation_ir = get_validation_ir(best_parameters, validation_inputs, validation_outputs);
-        Log::info("best validation mse: %lf, validation information ratio: %lf\n", best_validation_mse, best_validation_ir);
+        // second objective of the weights EXAMM keeps (the epoch with the best validation MSE)
+        best_validation_obj2 = get_validation_objective(best_parameters, validation_inputs, validation_outputs);
+        Log::info(
+            "best validation mse: %lf, validation %s: %lf\n", best_validation_mse, second_objective.c_str(),
+            best_validation_obj2
+        );
     }
     Log::info("backpropagation completed, getting mu/sigma\n");
     double _mu, _sigma;
@@ -3671,13 +3722,13 @@ void RNN_Genome::read_from_stream(istream& bin_istream) {
     istringstream normalize_std_devs_iss(normalize_std_devs_str);
     read_map(normalize_std_devs_iss, normalize_std_devs);
 
-    // optional multi-objective block ("MOBJ" + validation IR), absent in genomes written by the original EXAMM
-    best_validation_ir = -EXAMM_MAX_DOUBLE;
+    // optional multi-objective block ("MOBJ" + second objective), absent in genomes written by the original EXAMM
+    best_validation_obj2 = -EXAMM_MAX_DOUBLE;
     selection_score = 0.0;
     std::streampos mobj_position = bin_istream.tellg();
     char mobj_tag[4];
     if (bin_istream.read(mobj_tag, 4) && memcmp(mobj_tag, "MOBJ", 4) == 0) {
-        bin_istream.read((char*) &best_validation_ir, sizeof(double));
+        bin_istream.read((char*) &best_validation_obj2, sizeof(double));
     } else {
         bin_istream.clear();
         if (mobj_position != std::streampos(-1)) {
@@ -3840,7 +3891,7 @@ void RNN_Genome::write_to_stream(ostream& bin_ostream) {
     // ordinary run are byte-for-byte what the original EXAMM writes
     if (multi_objective) {
         bin_ostream.write("MOBJ", 4);
-        bin_ostream.write((char*) &best_validation_ir, sizeof(double));
+        bin_ostream.write((char*) &best_validation_obj2, sizeof(double));
     }
 }
 
@@ -4311,7 +4362,7 @@ void RNN_Genome::transfer_to(
 
     best_validation_mse = EXAMM_MAX_DOUBLE;
     best_validation_mae = EXAMM_MAX_DOUBLE;
-    best_validation_ir = -EXAMM_MAX_DOUBLE;
+    best_validation_obj2 = -EXAMM_MAX_DOUBLE;
 
     get_mu_sigma(best_parameters, mu, sigma);
     Log::info("after transfer, mu: %lf, sigma: %lf\n", mu, sigma);

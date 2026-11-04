@@ -64,7 +64,7 @@ class IslandSpeciationStrategy : public SpeciationStrategy {
 
     /**
      * Multi-objective search only: every genome evaluated so far that no other evaluated genome
-     * dominates on (validation MSE, validation information ratio), capped at
+     * dominates on (validation MSE, validation second objective), capped at
      * RNN_Genome::pareto_archive_size (the most crowded are dropped first). Survives extinction events.
      */
     vector<RNN_Genome*> pareto_archive;

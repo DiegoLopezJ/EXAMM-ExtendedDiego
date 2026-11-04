@@ -604,12 +604,12 @@ void IslandSpeciationStrategy::save_entire_population(string output_path) {
 }
 
 void IslandSpeciationStrategy::update_pareto_archive(RNN_Genome* genome) {
-    double mse = genome->get_best_validation_mse(), ir = genome->get_best_validation_ir();
+    double mse = genome->get_best_validation_mse(), ir = genome->get_best_validation_obj2();
     if (std::isnan(mse) || std::isinf(mse) || std::isnan(ir) || ir <= -EXAMM_MAX_DOUBLE) {
         return;
     }
     for (RNN_Genome* g : pareto_archive) {
-        if (g->dominates(genome) || (g->get_best_validation_mse() == mse && g->get_best_validation_ir() == ir)) {
+        if (g->dominates(genome) || (g->get_best_validation_mse() == mse && g->get_best_validation_obj2() == ir)) {
             return;
         }
     }
@@ -635,7 +635,7 @@ void IslandSpeciationStrategy::update_pareto_archive(RNN_Genome* genome) {
             return a->get_best_validation_mse() < b->get_best_validation_mse();
         });
         double mse_range = pareto_archive.back()->get_best_validation_mse() - pareto_archive.front()->get_best_validation_mse();
-        double ir_range = pareto_archive.front()->get_best_validation_ir() - pareto_archive.back()->get_best_validation_ir();
+        double ir_range = pareto_archive.front()->get_best_validation_obj2() - pareto_archive.back()->get_best_validation_obj2();
         int32_t most_crowded = 1;
         double smallest = EXAMM_MAX_DOUBLE;
         for (int32_t k = 1; k + 1 < (int32_t) pareto_archive.size(); k++) {
@@ -645,7 +645,7 @@ void IslandSpeciationStrategy::update_pareto_archive(RNN_Genome* genome) {
                      / mse_range;
             }
             if (ir_range > 0.0) {
-                d += (pareto_archive[k - 1]->get_best_validation_ir() - pareto_archive[k + 1]->get_best_validation_ir())
+                d += (pareto_archive[k - 1]->get_best_validation_obj2() - pareto_archive[k + 1]->get_best_validation_obj2())
                      / ir_range;
             }
             if (d < smallest) {
@@ -666,7 +666,9 @@ void IslandSpeciationStrategy::save_pareto_archive(string output_path) {
         return a->get_best_validation_mse() < b->get_best_validation_mse();
     });
     ofstream front(output_path + "/pareto_front.csv");
-    front << "genome_id,val_mse,val_ir,enabled_nodes,enabled_edges,enabled_recurrent_edges" << endl;
+    // second-objective column: val_ir (--objective mse_ir) or val_return (--objective mse_ret)
+    front << "genome_id,val_mse," << (RNN_Genome::second_objective == "return" ? "val_return" : "val_ir")
+          << ",enabled_nodes,enabled_edges,enabled_recurrent_edges" << endl;
     for (RNN_Genome* g : pareto_archive) {
         string name = output_path + "/pareto_genome_" + to_string(g->get_generation_id());
         g->write_to_file(name + ".bin");
@@ -674,7 +676,7 @@ void IslandSpeciationStrategy::save_pareto_archive(string output_path) {
         ofstream equations(name + ".txt");
         g->write_equations(equations);
         front << g->get_generation_id() << "," << std::setprecision(10) << g->get_best_validation_mse() << ","
-              << g->get_best_validation_ir() << "," << g->get_enabled_node_count() << ","
+              << g->get_best_validation_obj2() << "," << g->get_enabled_node_count() << ","
               << g->get_enabled_edge_count() << "," << g->get_enabled_recurrent_edge_count() << endl;
     }
 }

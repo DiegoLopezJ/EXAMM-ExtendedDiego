@@ -163,7 +163,8 @@ class Island {
     /**
      * Multi-objective version of insert_genome (used when RNN_Genome::multi_objective is set):
      * the island keeps the genomes that rank best by Pareto front on (lower validation MSE, higher
-     * validation information ratio), ties within a front broken by crowding distance (NSGA-II).
+     * validation second objective: information ratio or portfolio return), ties within a front broken by
+     * crowding distance (NSGA-II).
      * Returns -1 if not inserted, otherwise the genome's position in the island (0 = best).
      */
     int32_t insert_genome_multi_objective(RNN_Genome* genome);

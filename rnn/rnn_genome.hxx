@@ -63,22 +63,40 @@ class RNN_Genome {
     vector<double> best_parameters;
 
    public:
-    // multi-objective search (--objective mse_ir): second objective = validation information ratio of a daily
-    // long-short book (long the top ir_long_short_n forecasts, short the bottom ir_long_short_n) against a
-    // benchmark (the reversal strategy's daily long-short returns on the same validation days).
-    double best_validation_ir;  // information ratio at best_parameters (higher is better); -EXAMM_MAX_DOUBLE if unset
+    // multi-objective search: validation MSE (lower is better) and a second validation objective (higher is
+    // better), both from a daily long-short book (long the top ir_long_short_n forecasts, short the bottom
+    // ir_long_short_n):
+    //   --objective mse_ir  : information ratio of the book against a benchmark (the reversal strategy's daily
+    //                         long-short returns on the same validation days)
+    //   --objective mse_ret : annualized mean return of the book (before costs, normalized RET units)
+    double best_validation_obj2;  // second objective at best_parameters; -EXAMM_MAX_DOUBLE if unset
     double selection_score;     // Pareto front + crowding term, set by Island when multi_objective (lower is better)
     static bool multi_objective;
+    static string second_objective;  // "ir" or "return"
     static vector<double> ir_benchmark;
     static int32_t ir_long_short_n;
     static int32_t pareto_archive_size;
     static void set_ir_benchmark(const vector<double>& benchmark, int32_t long_short_n, int32_t archive_size);
+    static void set_return_objective(int32_t long_short_n, int32_t archive_size);
+    vector<double> get_validation_book(
+        const vector<double>& parameters, const vector<vector<vector<double> > >& inputs,
+        const vector<vector<vector<double> > >& outputs, int32_t max_days
+    );
     double get_validation_ir(
         const vector<double>& parameters, const vector<vector<vector<double> > >& inputs,
         const vector<vector<vector<double> > >& outputs
     );
-    double get_best_validation_ir() const;
-    // true if this genome is at least as good on validation MSE and IR as other, and strictly better on one
+    double get_validation_return(
+        const vector<double>& parameters, const vector<vector<vector<double> > >& inputs,
+        const vector<vector<vector<double> > >& outputs
+    );
+    double get_validation_objective(
+        const vector<double>& parameters, const vector<vector<vector<double> > >& inputs,
+        const vector<vector<vector<double> > >& outputs
+    );
+    double get_best_validation_obj2() const;
+    // true if this genome is at least as good on validation MSE and the second objective as other, and strictly
+    // better on one
     bool dominates(const RNN_Genome* other) const;
 
    private:

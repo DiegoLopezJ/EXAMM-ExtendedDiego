@@ -288,8 +288,10 @@ int main(int argc, char** argv) {
 
     RNN_Genome* seed_genome = get_seed_genome(arguments, time_series_sets, weight_rules);
 
-    // multi-objective search: --objective mse_ir --ir_benchmark_file <csv> [--ir_long_short_n 5] [--pareto_archive_size 50]
-    // every rank loads the benchmark (workers compute each genome's information ratio, the master ranks the islands)
+    // multi-objective search, second objective computed by the workers, islands ranked by the master:
+    //   --objective mse_ir  --ir_benchmark_file <csv>  validation MSE vs information ratio against the benchmark
+    //   --objective mse_ret                            validation MSE vs long-short portfolio return
+    // both: [--ir_long_short_n 5] [--pareto_archive_size 50]
     string objective = "mse";
     get_argument(arguments, "--objective", false, objective);
     if (objective == "mse_ir") {
@@ -317,8 +319,18 @@ int main(int argc, char** argv) {
             "from '%s', Pareto archive of up to %d genomes\n",
             long_short_n, long_short_n, (int32_t) benchmark.size(), benchmark_file.c_str(), archive_size
         );
+    } else if (objective == "mse_ret") {
+        int32_t long_short_n = 5, archive_size = 50;
+        get_argument(arguments, "--ir_long_short_n", false, long_short_n);
+        get_argument(arguments, "--pareto_archive_size", false, archive_size);
+        RNN_Genome::set_return_objective(long_short_n, archive_size);
+        Log::info(
+            "multi-objective search: validation MSE vs long-short %d/%d portfolio return (before costs), Pareto archive "
+            "of up to %d genomes\n",
+            long_short_n, long_short_n, archive_size
+        );
     } else if (objective != "mse") {
-        Log::fatal("ERROR: unknown --objective '%s' (use mse or mse_ir)\n", objective.c_str());
+        Log::fatal("ERROR: unknown --objective '%s' (use mse, mse_ir or mse_ret)\n", objective.c_str());
         exit(1);
     }
 
