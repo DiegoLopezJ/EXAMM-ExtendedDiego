@@ -1,4 +1,6 @@
 #include <chrono>
+#include <fstream>
+using std::ifstream;
 #include <iomanip>
 using std::fixed;
 using std::setprecision;
@@ -285,6 +287,40 @@ int main(int argc, char** argv) {
     weight_rules->initialize_from_args(arguments);
 
     RNN_Genome* seed_genome = get_seed_genome(arguments, time_series_sets, weight_rules);
+
+    // multi-objective search: --objective mse_ir --ir_benchmark_file <csv> [--ir_long_short_n 5] [--pareto_archive_size 50]
+    // every rank loads the benchmark (workers compute each genome's information ratio, the master ranks the islands)
+    string objective = "mse";
+    get_argument(arguments, "--objective", false, objective);
+    if (objective == "mse_ir") {
+        string benchmark_file;
+        get_argument(arguments, "--ir_benchmark_file", true, benchmark_file);
+        int32_t long_short_n = 5, archive_size = 50;
+        get_argument(arguments, "--ir_long_short_n", false, long_short_n);
+        get_argument(arguments, "--pareto_archive_size", false, archive_size);
+        ifstream benchmark_stream(benchmark_file);
+        if (!benchmark_stream.good()) {
+            Log::fatal("ERROR: could not open --ir_benchmark_file '%s'\n", benchmark_file.c_str());
+            exit(1);
+        }
+        vector<double> benchmark;
+        string line;
+        getline(benchmark_stream, line);  // header
+        while (getline(benchmark_stream, line)) {
+            if (!line.empty()) {
+                benchmark.push_back(stod(line));
+            }
+        }
+        RNN_Genome::set_ir_benchmark(benchmark, long_short_n, archive_size);
+        Log::info(
+            "multi-objective search: validation MSE vs information ratio (long-short %d/%d) against %d benchmark days "
+            "from '%s', Pareto archive of up to %d genomes\n",
+            long_short_n, long_short_n, (int32_t) benchmark.size(), benchmark_file.c_str(), archive_size
+        );
+    } else if (objective != "mse") {
+        Log::fatal("ERROR: unknown --objective '%s' (use mse or mse_ir)\n", objective.c_str());
+        exit(1);
+    }
 
     Log::clear_rank_restriction();
 

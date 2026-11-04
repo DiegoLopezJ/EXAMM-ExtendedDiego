@@ -62,6 +62,14 @@ class IslandSpeciationStrategy : public SpeciationStrategy {
     vector<Island*> islands;
     RNN_Genome* global_best_genome;
 
+    /**
+     * Multi-objective search only: every genome evaluated so far that no other evaluated genome
+     * dominates on (validation MSE, validation information ratio), capped at
+     * RNN_Genome::pareto_archive_size (the most crowded are dropped first). Survives extinction events.
+     */
+    vector<RNN_Genome*> pareto_archive;
+    void update_pareto_archive(RNN_Genome* genome);
+
     // Transfer learning class properties:
 
     bool transfer_learning;
@@ -233,6 +241,7 @@ class IslandSpeciationStrategy : public SpeciationStrategy {
     void repopulate();
 
     void save_entire_population(string output_path);
+    void save_pareto_archive(string output_path);
     void apply_homeostasis(double downscale_factor);  // SHY: scale all genome best_parameters
 };
 

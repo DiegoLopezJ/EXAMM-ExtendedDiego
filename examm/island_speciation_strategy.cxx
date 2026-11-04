@@ -1,4 +1,10 @@
+#include <algorithm>
 #include <cmath>
+#include <fstream>
+using std::endl;
+using std::ofstream;
+#include <iomanip>
+using std::to_string;
 #include <cstdint>
 #include <functional>
 using std::function;
@@ -174,6 +180,9 @@ int32_t IslandSpeciationStrategy::insert_genome(RNN_Genome* genome) {
         new_global_best = true;
     }
     evaluated_genomes++;
+    if (RNN_Genome::multi_objective) {
+        update_pareto_archive(genome);
+    }
     int32_t island = genome->get_group_id();
 
     Log::info("Island %d: inserting genome\n", island);
@@ -591,6 +600,82 @@ RNN_Genome* IslandSpeciationStrategy::get_seed_genome() {
 void IslandSpeciationStrategy::save_entire_population(string output_path) {
     for (int32_t i = 0; i < (int32_t) islands.size(); i++) {
         islands[i]->save_population(output_path);
+    }
+}
+
+void IslandSpeciationStrategy::update_pareto_archive(RNN_Genome* genome) {
+    double mse = genome->get_best_validation_mse(), ir = genome->get_best_validation_ir();
+    if (std::isnan(mse) || std::isinf(mse) || std::isnan(ir) || ir <= -EXAMM_MAX_DOUBLE) {
+        return;
+    }
+    for (RNN_Genome* g : pareto_archive) {
+        if (g->dominates(genome) || (g->get_best_validation_mse() == mse && g->get_best_validation_ir() == ir)) {
+            return;
+        }
+    }
+    for (auto it = pareto_archive.begin(); it != pareto_archive.end();) {
+        if (genome->dominates(*it)) {
+            delete *it;
+            it = pareto_archive.erase(it);
+        } else {
+            it++;
+        }
+    }
+    RNN_Genome* copy = genome->copy();
+    vector<double> best = copy->get_best_parameters();
+    if (best.size() != 0) {
+        copy->set_weights(best);
+    }
+    copy->set_generation_id(genome->get_generation_id());
+    pareto_archive.push_back(copy);
+
+    // over the cap: drop the genome with the smallest crowding distance (never an end of the front)
+    while ((int32_t) pareto_archive.size() > RNN_Genome::pareto_archive_size && pareto_archive.size() > 2) {
+        sort(pareto_archive.begin(), pareto_archive.end(), [](RNN_Genome* a, RNN_Genome* b) {
+            return a->get_best_validation_mse() < b->get_best_validation_mse();
+        });
+        double mse_range = pareto_archive.back()->get_best_validation_mse() - pareto_archive.front()->get_best_validation_mse();
+        double ir_range = pareto_archive.front()->get_best_validation_ir() - pareto_archive.back()->get_best_validation_ir();
+        int32_t most_crowded = 1;
+        double smallest = EXAMM_MAX_DOUBLE;
+        for (int32_t k = 1; k + 1 < (int32_t) pareto_archive.size(); k++) {
+            double d = 0.0;
+            if (mse_range > 0.0) {
+                d += (pareto_archive[k + 1]->get_best_validation_mse() - pareto_archive[k - 1]->get_best_validation_mse())
+                     / mse_range;
+            }
+            if (ir_range > 0.0) {
+                d += (pareto_archive[k - 1]->get_best_validation_ir() - pareto_archive[k + 1]->get_best_validation_ir())
+                     / ir_range;
+            }
+            if (d < smallest) {
+                smallest = d;
+                most_crowded = k;
+            }
+        }
+        delete pareto_archive[most_crowded];
+        pareto_archive.erase(pareto_archive.begin() + most_crowded);
+    }
+}
+
+void IslandSpeciationStrategy::save_pareto_archive(string output_path) {
+    if (pareto_archive.empty()) {
+        return;
+    }
+    sort(pareto_archive.begin(), pareto_archive.end(), [](RNN_Genome* a, RNN_Genome* b) {
+        return a->get_best_validation_mse() < b->get_best_validation_mse();
+    });
+    ofstream front(output_path + "/pareto_front.csv");
+    front << "genome_id,val_mse,val_ir,enabled_nodes,enabled_edges,enabled_recurrent_edges" << endl;
+    for (RNN_Genome* g : pareto_archive) {
+        string name = output_path + "/pareto_genome_" + to_string(g->get_generation_id());
+        g->write_to_file(name + ".bin");
+        g->write_graphviz(name + ".gv");
+        ofstream equations(name + ".txt");
+        g->write_equations(equations);
+        front << g->get_generation_id() << "," << std::setprecision(10) << g->get_best_validation_mse() << ","
+              << g->get_best_validation_ir() << "," << g->get_enabled_node_count() << ","
+              << g->get_enabled_edge_count() << "," << g->get_enabled_recurrent_edge_count() << endl;
     }
 }
 

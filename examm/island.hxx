@@ -161,6 +161,24 @@ class Island {
     int32_t insert_genome(RNN_Genome* genome);
 
     /**
+     * Multi-objective version of insert_genome (used when RNN_Genome::multi_objective is set):
+     * the island keeps the genomes that rank best by Pareto front on (lower validation MSE, higher
+     * validation information ratio), ties within a front broken by crowding distance (NSGA-II).
+     * Returns -1 if not inserted, otherwise the genome's position in the island (0 = best).
+     */
+    int32_t insert_genome_multi_objective(RNN_Genome* genome);
+
+    /**
+     * Sets every genome's selection_score (Pareto front + crowding term, lower is better) and sorts the island by it.
+     */
+    void rank_pareto();
+
+    /**
+     * Removes a genome from the island's structure map (the genome itself is not deleted).
+     */
+    void remove_from_structure_map(RNN_Genome* genome);
+
+    /**
      * Prints out the state of this island.
      *
      * \param indent is how much to indent what is printed out

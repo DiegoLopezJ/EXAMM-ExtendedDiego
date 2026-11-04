@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cmath>
 using std::lower_bound;
 using std::sort;
 using std::upper_bound;
@@ -54,6 +55,14 @@ RNN_Genome* Island::get_worst_genome() {
 }
 
 double Island::get_best_fitness() {
+    if (RNN_Genome::multi_objective) {
+        // islands are ranked (extinction events) by their best validation MSE, as in the single-objective search
+        double best = EXAMM_MAX_DOUBLE;
+        for (RNN_Genome* g : genomes) {
+            best = std::min(best, g->get_best_validation_mse());
+        }
+        return best;
+    }
     RNN_Genome* best_genome = get_best_genome();
     if (best_genome == NULL) {
         return EXAMM_MAX_DOUBLE;
@@ -63,6 +72,16 @@ double Island::get_best_fitness() {
 }
 
 double Island::get_worst_fitness() {
+    if (RNN_Genome::multi_objective) {
+        if (genomes.empty()) {
+            return EXAMM_MAX_DOUBLE;
+        }
+        double worst = -EXAMM_MAX_DOUBLE;
+        for (RNN_Genome* g : genomes) {
+            worst = std::max(worst, g->get_best_validation_mse());
+        }
+        return worst;
+    }
     RNN_Genome* worst_genome = get_worst_genome();
     if (worst_genome == NULL) {
         return EXAMM_MAX_DOUBLE;
@@ -137,6 +156,9 @@ void Island::do_population_check(int32_t line, int32_t initial_size) {
 // inserts a copy of the genome, caller of the function will need to delete their
 // pointer
 int32_t Island::insert_genome(RNN_Genome* genome) {
+    if (RNN_Genome::multi_objective) {
+        return insert_genome_multi_objective(genome);
+    }
     int32_t initial_size = (int32_t) genomes.size();
     if (genome->get_generation_id() <= erased_generation_id) {
         Log::trace("genome already erased, not inserting");
@@ -471,4 +493,173 @@ void Island::save_population(string output_path) {
         genome->write_graphviz(output_path + "/island_" + to_string(id) + "_genome_" + to_string(i) + ".gv");
         genome->write_to_file(output_path + "/island_" + to_string(id) + "_genome_" + to_string(i) + ".bin");
     }
+}
+
+// ---------------------------------------------------------------- multi-objective (--objective mse_ir) ----
+
+void Island::remove_from_structure_map(RNN_Genome* genome) {
+    string hash = genome->get_structural_hash();
+    auto entry = structure_map.find(hash);
+    if (entry == structure_map.end()) {
+        return;
+    }
+    vector<RNN_Genome*>& matches = entry->second;
+    for (auto it = matches.begin(); it != matches.end(); it++) {
+        if (*it == genome) {
+            matches.erase(it);
+            break;
+        }
+    }
+    if (matches.empty()) {
+        structure_map.erase(entry);
+    }
+}
+
+void Island::rank_pareto() {
+    int32_t n = (int32_t) genomes.size();
+    if (n == 0) {
+        return;
+    }
+    // non-dominated sorting on (validation MSE, validation IR)
+    vector<int32_t> front(n, -1);
+    int32_t assigned = 0, current = 0;
+    while (assigned < n) {
+        vector<int32_t> members;
+        for (int32_t i = 0; i < n; i++) {
+            if (front[i] >= 0) {
+                continue;
+            }
+            bool dominated = false;
+            for (int32_t j = 0; j < n && !dominated; j++) {
+                if (j != i && (front[j] < 0 || front[j] == current) && genomes[j]->dominates(genomes[i])) {
+                    dominated = true;
+                }
+            }
+            if (!dominated) {
+                members.push_back(i);
+            }
+        }
+        for (int32_t i : members) {
+            front[i] = current;
+        }
+        assigned += (int32_t) members.size();
+        current++;
+    }
+
+    // crowding distance within each front (objectives scaled by their range in the island)
+    double mse_lo = EXAMM_MAX_DOUBLE, mse_hi = -EXAMM_MAX_DOUBLE, ir_lo = EXAMM_MAX_DOUBLE, ir_hi = -EXAMM_MAX_DOUBLE;
+    for (RNN_Genome* g : genomes) {
+        mse_lo = std::min(mse_lo, g->get_best_validation_mse());
+        mse_hi = std::max(mse_hi, g->get_best_validation_mse());
+        ir_lo = std::min(ir_lo, g->get_best_validation_ir());
+        ir_hi = std::max(ir_hi, g->get_best_validation_ir());
+    }
+    vector<double> crowding(n, 0.0);
+    for (int32_t f = 0; f < current; f++) {
+        vector<int32_t> members;
+        for (int32_t i = 0; i < n; i++) {
+            if (front[i] == f) {
+                members.push_back(i);
+            }
+        }
+        for (int32_t objective = 0; objective < 2; objective++) {
+            auto value = [&](int32_t i) {
+                return objective == 0 ? genomes[i]->get_best_validation_mse() : genomes[i]->get_best_validation_ir();
+            };
+            double range = objective == 0 ? mse_hi - mse_lo : ir_hi - ir_lo;
+            sort(members.begin(), members.end(), [&](int32_t a, int32_t b) { return value(a) < value(b); });
+            crowding[members.front()] = EXAMM_MAX_DOUBLE;
+            crowding[members.back()] = EXAMM_MAX_DOUBLE;
+            for (int32_t k = 1; k + 1 < (int32_t) members.size(); k++) {
+                if (crowding[members[k]] < EXAMM_MAX_DOUBLE && range > 0.0) {
+                    crowding[members[k]] += (value(members[k + 1]) - value(members[k - 1])) / range;
+                }
+            }
+        }
+    }
+    // score = front + a term in [0, 1) that is smaller for less crowded genomes (front ends get 0)
+    for (int32_t i = 0; i < n; i++) {
+        double crowd_term = crowding[i] >= EXAMM_MAX_DOUBLE ? 0.0 : 1.0 / (1.0 + crowding[i]);
+        genomes[i]->selection_score = front[i] + 0.999 * crowd_term;
+    }
+    std::stable_sort(genomes.begin(), genomes.end(), [](RNN_Genome* a, RNN_Genome* b) {
+        if (a->selection_score != b->selection_score) {
+            return a->selection_score < b->selection_score;
+        }
+        return a->get_best_validation_mse() < b->get_best_validation_mse();
+    });
+}
+
+int32_t Island::insert_genome_multi_objective(RNN_Genome* genome) {
+    int32_t initial_size = (int32_t) genomes.size();
+    if (genome->get_generation_id() <= erased_generation_id) {
+        Log::trace("genome already erased, not inserting");
+        do_population_check(__LINE__, initial_size);
+        return -1;
+    }
+    double mse = genome->get_best_validation_mse(), ir = genome->get_best_validation_ir();
+    if (std::isnan(mse) || std::isinf(mse) || std::isnan(ir) || ir <= -EXAMM_MAX_DOUBLE) {
+        Log::info("Island %d: not inserting genome without a valid MSE / information ratio\n", id);
+        do_population_check(__LINE__, initial_size);
+        return -1;
+    }
+    Log::info("inserting genome with mse: %lf, information ratio: %lf to island %d\n", mse, ir, id);
+
+    // an identical genome already in the island is replaced only if the new one dominates it
+    string structural_hash = genome->get_structural_hash();
+    auto entry = structure_map.find(structural_hash);
+    if (entry != structure_map.end()) {
+        vector<RNN_Genome*> matches = entry->second;  // copy: entries may be removed below
+        for (RNN_Genome* match : matches) {
+            if (match->equals(genome)) {
+                if (!genome->dominates(match)) {
+                    Log::info("Island %d: an identical genome that is not dominated is already here, not inserting\n", id);
+                    do_population_check(__LINE__, initial_size);
+                    return -1;
+                }
+                remove_from_structure_map(match);
+                genomes.erase(std::find(genomes.begin(), genomes.end(), match));
+                delete match;
+            }
+        }
+    }
+
+    RNN_Genome* copy = genome->copy();
+    vector<double> best = copy->get_best_parameters();
+    if (best.size() != 0) {
+        copy->set_weights(best);
+    }
+    copy->set_generation_id(genome->get_generation_id());
+    genomes.push_back(copy);
+    structure_map[copy->get_structural_hash()].push_back(copy);
+
+    rank_pareto();
+
+    if ((int32_t) genomes.size() > max_size) {
+        // remove the worst ranked genome (last front, most crowded)
+        RNN_Genome* worst = genomes.back();
+        genomes.pop_back();
+        remove_from_structure_map(worst);
+        bool was_new = worst == copy;
+        delete worst;
+        if (was_new) {
+            Log::debug("Island %d: new genome ranked last, not kept\n", id);
+            status = Island::FILLED;
+            do_population_check(__LINE__, initial_size);
+            return -1;
+        }
+    }
+    if ((int32_t) genomes.size() >= max_size) {
+        status = Island::FILLED;
+    }
+
+    int32_t insert_index = (int32_t) (std::find(genomes.begin(), genomes.end(), copy) - genomes.begin());
+    if (insert_index == 0 && genome->get_best_validation_mse() != EXAMM_MAX_DOUBLE) {
+        vector<double> best_parameters = genome->get_best_parameters();
+        genome->set_weights(best_parameters);
+    }
+    Log::info("Island %d: genomes.size(): %d, max_size: %d, status: %d, inserted at: %d\n", id, genomes.size(),
+              max_size, status, insert_index);
+    do_population_check(__LINE__, initial_size);
+    return insert_index;
 }
