@@ -546,9 +546,13 @@ void Island::rank_pareto() {
         current++;
     }
 
-    // crowding distance within each front (objectives scaled by their range in the island)
+    // crowding distance within each front (objectives scaled by their range over the island's trained genomes;
+    // untrained placeholders, which every trained genome dominates, are left out of the ranges)
     double mse_lo = EXAMM_MAX_DOUBLE, mse_hi = -EXAMM_MAX_DOUBLE, ir_lo = EXAMM_MAX_DOUBLE, ir_hi = -EXAMM_MAX_DOUBLE;
     for (RNN_Genome* g : genomes) {
+        if (g->get_best_validation_mse() >= EXAMM_MAX_DOUBLE || g->get_best_validation_obj2() <= -EXAMM_MAX_DOUBLE) {
+            continue;
+        }
         mse_lo = std::min(mse_lo, g->get_best_validation_mse());
         mse_hi = std::max(mse_hi, g->get_best_validation_mse());
         ir_lo = std::min(ir_lo, g->get_best_validation_obj2());
@@ -597,9 +601,14 @@ int32_t Island::insert_genome_multi_objective(RNN_Genome* genome) {
         do_population_check(__LINE__, initial_size);
         return -1;
     }
+    // Untrained placeholders (MSE = EXAMM_MAX_DOUBLE, second objective unset) are inserted like in the
+    // single-objective island: while an island initializes, EXAMM fills it with copies of newly generated genomes
+    // so that it fills up and later genomes are mutations of them. Every trained genome dominates a placeholder,
+    // so placeholders are the first to be removed once trained genomes arrive. Trained genomes whose second
+    // objective is undefined are treated like placeholders (worst possible second objective).
     double mse = genome->get_best_validation_mse(), ir = genome->get_best_validation_obj2();
-    if (std::isnan(mse) || std::isinf(mse) || std::isnan(ir) || ir <= -EXAMM_MAX_DOUBLE) {
-        Log::info("Island %d: not inserting genome without a valid MSE / second objective\n", id);
+    if (std::isnan(mse) || std::isinf(mse) || std::isnan(ir)) {
+        Log::info("Island %d: not inserting genome with a NaN / infinite MSE or second objective\n", id);
         do_population_check(__LINE__, initial_size);
         return -1;
     }

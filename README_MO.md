@@ -81,3 +81,13 @@ New files: `data_prep/write_core7_reversal_benchmark.py`, `scripts/core7_examm_y
   its column `val_ir` or `val_return`; candidate selection reads both.
 
 Not yet checked: a real `mpirun` search (step 3).
+
+## Fix (2026-11-05): placeholders during island initialization
+
+The first MSE vs IR runs (jobs 21940080-82) rejected the untrained placeholder genomes EXAMM inserts while an
+island initializes. Islands then stayed empty, every new genome was an unmutated copy of the seed, and the
+placeholders still counted toward `--max_genomes`: the runs trained only 67-96% of the genomes of the original
+MSE-only runs, and 2023 set1 (where the seed's training returns NaN) trained 2% and stopped after 17 s.
+Fixed in `examm/island.cxx`: placeholders are inserted as in the original EXAMM (every trained genome dominates
+them, so they are removed first) and are left out of the crowding ranges. Results from before the fix are not
+comparable with the MSE-only runs and should be rerun.
