@@ -951,6 +951,7 @@ bool RNN_Genome::multi_objective = false;
 string RNN_Genome::second_objective = "ir";
 vector<double> RNN_Genome::ir_benchmark;
 int32_t RNN_Genome::ir_long_short_n = 5;
+int32_t RNN_Genome::book_hold_days = 1;
 int32_t RNN_Genome::pareto_archive_size = 50;
 
 void RNN_Genome::set_ir_benchmark(const vector<double>& benchmark, int32_t long_short_n, int32_t archive_size) {
@@ -959,6 +960,10 @@ void RNN_Genome::set_ir_benchmark(const vector<double>& benchmark, int32_t long_
     pareto_archive_size = archive_size;
     second_objective = "ir";
     multi_objective = true;
+}
+
+void RNN_Genome::set_book_hold_days(int32_t hold_days) {
+    book_hold_days = std::max(1, hold_days);
 }
 
 void RNN_Genome::set_return_objective(int32_t long_short_n, int32_t archive_size) {
@@ -983,6 +988,9 @@ bool RNN_Genome::dominates(const RNN_Genome* other) const {
 // forecast and short the ir_long_short_n with the lowest; the day's return is the mean realized (normalized) output of
 // the longs minus that of the shorts. All series share one normalization, so this is the raw long-short return up to
 // a positive scale factor. Uses at most max_days days (max_days <= 0: every forecast day). Empty if undefined.
+// With book_hold_days = H > 1 (--book_hold_days, the overlapping rule): the long-short picks made on day s are held
+// for days s .. s+H-1, so day t's return is the average, over the books opened on days max(0, t-H+1) .. t, of that
+// book's long-minus-short realized return on day t (each book equal weight; fewer books in the first H-1 days).
 vector<double> RNN_Genome::get_validation_book(
     const vector<double>& parameters, const vector<vector<vector<double> > >& inputs,
     const vector<vector<vector<double> > >& outputs, int32_t max_days
@@ -1006,17 +1014,48 @@ vector<double> RNN_Genome::get_validation_book(
 
     vector<double> book(n_days);
     vector<int32_t> order(n_series);
-    for (int32_t t = 0; t < n_days; t++) {
+    if (book_hold_days <= 1) {
+        for (int32_t t = 0; t < n_days; t++) {
+            std::iota(order.begin(), order.end(), 0);
+            std::stable_sort(order.begin(), order.end(), [&](int32_t a, int32_t b) {
+                return predictions[a][t] > predictions[b][t];
+            });
+            double longs = 0.0, shorts = 0.0;
+            for (int32_t k = 0; k < ir_long_short_n; k++) {
+                longs += outputs[order[k]][0][t];
+                shorts += outputs[order[n_series - 1 - k]][0][t];
+            }
+            book[t] = (longs - shorts) / ir_long_short_n;
+            if (std::isnan(book[t]) || std::isinf(book[t])) {
+                return vector<double>();
+            }
+        }
+        return book;
+    }
+
+    // overlapping books: picks of every day first, then each day's return over the books still held
+    vector<vector<int32_t> > longs_of(n_days), shorts_of(n_days);
+    for (int32_t s = 0; s < n_days; s++) {
         std::iota(order.begin(), order.end(), 0);
         std::stable_sort(order.begin(), order.end(), [&](int32_t a, int32_t b) {
-            return predictions[a][t] > predictions[b][t];
+            return predictions[a][s] > predictions[b][s];
         });
-        double longs = 0.0, shorts = 0.0;
-        for (int32_t k = 0; k < ir_long_short_n; k++) {
-            longs += outputs[order[k]][0][t];
-            shorts += outputs[order[n_series - 1 - k]][0][t];
+        longs_of[s].assign(order.begin(), order.begin() + ir_long_short_n);
+        shorts_of[s].assign(order.end() - ir_long_short_n, order.end());
+    }
+    for (int32_t t = 0; t < n_days; t++) {
+        double total = 0.0;
+        int32_t books_held = 0;
+        for (int32_t s = std::max(0, t - book_hold_days + 1); s <= t; s++) {
+            double longs = 0.0, shorts = 0.0;
+            for (int32_t k = 0; k < ir_long_short_n; k++) {
+                longs += outputs[longs_of[s][k]][0][t];
+                shorts += outputs[shorts_of[s][k]][0][t];
+            }
+            total += (longs - shorts) / ir_long_short_n;
+            books_held++;
         }
-        book[t] = (longs - shorts) / ir_long_short_n;
+        book[t] = total / books_held;
         if (std::isnan(book[t]) || std::isinf(book[t])) {
             return vector<double>();
         }

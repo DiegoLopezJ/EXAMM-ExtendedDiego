@@ -292,6 +292,7 @@ int main(int argc, char** argv) {
     //   --objective mse_ir  --ir_benchmark_file <csv>  validation MSE vs information ratio against the benchmark
     //   --objective mse_ret                            validation MSE vs long-short portfolio return
     // both: [--ir_long_short_n 5] [--pareto_archive_size 50]
+    //       [--book_hold_days 1]: 1 = daily long-short book; H > 1 = each day's picks held H days (overlapping rule)
     string objective = "mse";
     get_argument(arguments, "--objective", false, objective);
     if (objective == "mse_ir") {
@@ -332,6 +333,12 @@ int main(int argc, char** argv) {
     } else if (objective != "mse") {
         Log::fatal("ERROR: unknown --objective '%s' (use mse, mse_ir or mse_ret)\n", objective.c_str());
         exit(1);
+    }
+    if (objective != "mse") {
+        int32_t hold_days = 1;
+        get_argument(arguments, "--book_hold_days", false, hold_days);
+        RNN_Genome::set_book_hold_days(hold_days);
+        Log::info("long-short book: picks held %d day(s)\n", RNN_Genome::book_hold_days);
     }
 
     Log::clear_rank_restriction();

@@ -75,7 +75,9 @@ class RNN_Genome {
     static string second_objective;  // "ir" or "return"
     static vector<double> ir_benchmark;
     static int32_t ir_long_short_n;
+    static int32_t book_hold_days;  // 1 = daily long-short book; H > 1 = each day's book held H days (overlapping)
     static int32_t pareto_archive_size;
+    static void set_book_hold_days(int32_t hold_days);
     static void set_ir_benchmark(const vector<double>& benchmark, int32_t long_short_n, int32_t archive_size);
     static void set_return_objective(int32_t long_short_n, int32_t archive_size);
     vector<double> get_validation_book(

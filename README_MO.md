@@ -100,3 +100,12 @@ depth). This is the original EXAMM's known add_edge segfault (its guard was comm
 islands keep more varied genomes, so it happened far more often (2023: 9 repeats incomplete, 2 tasks timed out
 retrying). Fixed with the guard: add_edge returns false and `mutate` tries another mutation. It is reached only
 where the old code crashed, so completed runs are unaffected and stay comparable.
+
+## Option `--book_hold_days H` (2026-11-07): search objective matched to the overlapping rule
+
+`--book_hold_days 10` makes the in-search long-short book hold each day's picks 10 days (day t's return = average
+over the books opened on days t-9..t), matching the overlap 5/5 hold 10 trading rule. Default 1 = the daily book
+(unchanged: the IR and return of the test genome are reproduced exactly). Job script:
+`scripts/core7_examm_yearly_ret_mo_ret10.sh` (`--objective mse_ret --book_hold_days 10`) ->
+`test_output/core7_examm_ret_mo_ret10_<Y>/`. Mac frontier: `core7_mo_frontier.py --run ret10 --rule overlap`.
+Check: C++ hold-10 book matches an independent Python calculation (max daily difference 6e-17).
