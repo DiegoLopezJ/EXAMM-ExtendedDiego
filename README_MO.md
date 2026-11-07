@@ -91,3 +91,12 @@ MSE-only runs, and 2023 set1 (where the seed's training returns NaN) trained 2% 
 Fixed in `examm/island.cxx`: placeholders are inserted as in the original EXAMM (every trained genome dominates
 them, so they are removed first) and are left out of the crowding ranges. Results from before the fix are not
 comparable with the MSE-only runs and should be rerun.
+
+## Fix (2026-11-07): master crash in `RNN_Genome::add_edge`
+
+The rerun (jobs 21977264-66) crashed 42 times, all in the master process: `EXAMM::mutate` -> `RNN_Genome::add_edge`
+indexed an empty node list when a genome picked for mutation had no reachable node (or all reachable nodes at one
+depth). This is the original EXAMM's known add_edge segfault (its guard was commented out); the multi-objective
+islands keep more varied genomes, so it happened far more often (2023: 9 repeats incomplete, 2 tasks timed out
+retrying). Fixed with the guard: add_edge returns false and `mutate` tries another mutation. It is reached only
+where the old code crashed, so completed runs are unaffected and stay comparable.
