@@ -1,0 +1,304 @@
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/A_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/A_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/ATO_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/ATO_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/AVY_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/AVY_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/BAX_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/BAX_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/CBRE_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/CBRE_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/CLX_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/CLX_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/CTRA_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/CTRA_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/DGX_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/DGX_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/DVA_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/DVA_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/EQR_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/EQR_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/EQT_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/EQT_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/ERIE_test.csv
+[WARNING main                 ] WARNING: unchanging series: 'ILLIQUIDITY'
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/ERIE_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/EXPD_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/EXPD_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/FISV_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/FISV_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/FITB_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/FITB_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/FRT_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/FRT_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/GEN_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/GEN_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/HUM_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/HUM_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/IDXX_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/IDXX_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/IEX_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/IEX_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/JBHT_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/JBHT_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/JBL_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/JBL_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/KEY_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/KEY_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/KIM_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/KIM_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/LII_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/LII_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/LNT_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/LNT_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/LUV_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/LUV_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/LVS_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/LVS_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/MAS_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/MAS_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/MLM_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/MLM_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/MOH_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/MOH_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/MTD_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/MTD_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/NTAP_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/NTAP_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/ON_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/ON_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/PAYX_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/PAYX_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/PEG_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/PEG_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/PFG_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/PFG_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/PHM_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/PHM_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/PKG_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/PKG_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/RL_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/RL_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/RVTY_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/RVTY_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/STLD_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/STLD_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/SYY_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/SYY_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/TPR_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/TPR_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/TRMB_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/TRMB_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/TROW_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/TROW_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/UHS_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/UHS_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/WST_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/WST_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/WTW_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/WTW_test.csv' with number rows: 291
+[INFO    main                 ] 	/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/ZBRA_test.csv
+[INFO    main                 ] read time series '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/ZBRA_test.csv' with number rows: 291
+[INFO    main                 ] normalized type: avg_std_dev 
+[INFO    main                 ] MSE: 0.366948
+[INFO    main                 ] MAE: 0.582961
+[INFO    main                 ] input filename[    0]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/A_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/A_test_predictions.csv'
+[INFO    main                 ] input filename[    1]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/ATO_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/ATO_test_predictions.csv'
+[INFO    main                 ] input filename[    2]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/AVY_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/AVY_test_predictions.csv'
+[INFO    main                 ] input filename[    3]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/BAX_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/BAX_test_predictions.csv'
+[INFO    main                 ] input filename[    4]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/CBRE_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/CBRE_test_predictions.csv'
+[INFO    main                 ] input filename[    5]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/CLX_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/CLX_test_predictions.csv'
+[INFO    main                 ] input filename[    6]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/CTRA_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/CTRA_test_predictions.csv'
+[INFO    main                 ] input filename[    7]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/DGX_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/DGX_test_predictions.csv'
+[INFO    main                 ] input filename[    8]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/DVA_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/DVA_test_predictions.csv'
+[INFO    main                 ] input filename[    9]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/EQR_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/EQR_test_predictions.csv'
+[INFO    main                 ] input filename[   10]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/EQT_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/EQT_test_predictions.csv'
+[INFO    main                 ] input filename[   11]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/ERIE_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/ERIE_test_predictions.csv'
+[INFO    main                 ] input filename[   12]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/EXPD_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/EXPD_test_predictions.csv'
+[INFO    main                 ] input filename[   13]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/FISV_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/FISV_test_predictions.csv'
+[INFO    main                 ] input filename[   14]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/FITB_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/FITB_test_predictions.csv'
+[INFO    main                 ] input filename[   15]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/FRT_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/FRT_test_predictions.csv'
+[INFO    main                 ] input filename[   16]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/GEN_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/GEN_test_predictions.csv'
+[INFO    main                 ] input filename[   17]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/HUM_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/HUM_test_predictions.csv'
+[INFO    main                 ] input filename[   18]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/IDXX_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/IDXX_test_predictions.csv'
+[INFO    main                 ] input filename[   19]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/IEX_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/IEX_test_predictions.csv'
+[INFO    main                 ] input filename[   20]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/JBHT_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/JBHT_test_predictions.csv'
+[INFO    main                 ] input filename[   21]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/JBL_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/JBL_test_predictions.csv'
+[INFO    main                 ] input filename[   22]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/KEY_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/KEY_test_predictions.csv'
+[INFO    main                 ] input filename[   23]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/KIM_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/KIM_test_predictions.csv'
+[INFO    main                 ] input filename[   24]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/LII_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/LII_test_predictions.csv'
+[INFO    main                 ] input filename[   25]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/LNT_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/LNT_test_predictions.csv'
+[INFO    main                 ] input filename[   26]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/LUV_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/LUV_test_predictions.csv'
+[INFO    main                 ] input filename[   27]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/LVS_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/LVS_test_predictions.csv'
+[INFO    main                 ] input filename[   28]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/MAS_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/MAS_test_predictions.csv'
+[INFO    main                 ] input filename[   29]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/MLM_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/MLM_test_predictions.csv'
+[INFO    main                 ] input filename[   30]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/MOH_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/MOH_test_predictions.csv'
+[INFO    main                 ] input filename[   31]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/MTD_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/MTD_test_predictions.csv'
+[INFO    main                 ] input filename[   32]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/NTAP_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/NTAP_test_predictions.csv'
+[INFO    main                 ] input filename[   33]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/ON_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/ON_test_predictions.csv'
+[INFO    main                 ] input filename[   34]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/PAYX_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/PAYX_test_predictions.csv'
+[INFO    main                 ] input filename[   35]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/PEG_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/PEG_test_predictions.csv'
+[INFO    main                 ] input filename[   36]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/PFG_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/PFG_test_predictions.csv'
+[INFO    main                 ] input filename[   37]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/PHM_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/PHM_test_predictions.csv'
+[INFO    main                 ] input filename[   38]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/PKG_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/PKG_test_predictions.csv'
+[INFO    main                 ] input filename[   39]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/RL_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/RL_test_predictions.csv'
+[INFO    main                 ] input filename[   40]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/RVTY_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/RVTY_test_predictions.csv'
+[INFO    main                 ] input filename[   41]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/STLD_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/STLD_test_predictions.csv'
+[INFO    main                 ] input filename[   42]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/SYY_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/SYY_test_predictions.csv'
+[INFO    main                 ] input filename[   43]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/TPR_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/TPR_test_predictions.csv'
+[INFO    main                 ] input filename[   44]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/TRMB_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/TRMB_test_predictions.csv'
+[INFO    main                 ] input filename[   45]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/TROW_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/TROW_test_predictions.csv'
+[INFO    main                 ] input filename[   46]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/UHS_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/UHS_test_predictions.csv'
+[INFO    main                 ] input filename[   47]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/WST_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/WST_test_predictions.csv'
+[INFO    main                 ] input filename[   48]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/WTW_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/WTW_test_predictions.csv'
+[INFO    main                 ] input filename[   49]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/ZBRA_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/ZBRA_test_predictions.csv'
+[INFO    main                 ] input filename[    0]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/A_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/A_test_predictions.csv'
+[INFO    main                 ] input filename[    1]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/ATO_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/ATO_test_predictions.csv'
+[INFO    main                 ] input filename[    2]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/AVY_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/AVY_test_predictions.csv'
+[INFO    main                 ] input filename[    3]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/BAX_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/BAX_test_predictions.csv'
+[INFO    main                 ] input filename[    4]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/CBRE_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/CBRE_test_predictions.csv'
+[INFO    main                 ] input filename[    5]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/CLX_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/CLX_test_predictions.csv'
+[INFO    main                 ] input filename[    6]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/CTRA_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/CTRA_test_predictions.csv'
+[INFO    main                 ] input filename[    7]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/DGX_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/DGX_test_predictions.csv'
+[INFO    main                 ] input filename[    8]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/DVA_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/DVA_test_predictions.csv'
+[INFO    main                 ] input filename[    9]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/EQR_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/EQR_test_predictions.csv'
+[INFO    main                 ] input filename[   10]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/EQT_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/EQT_test_predictions.csv'
+[INFO    main                 ] input filename[   11]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/ERIE_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/ERIE_test_predictions.csv'
+[INFO    main                 ] input filename[   12]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/EXPD_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/EXPD_test_predictions.csv'
+[INFO    main                 ] input filename[   13]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/FISV_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/FISV_test_predictions.csv'
+[INFO    main                 ] input filename[   14]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/FITB_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/FITB_test_predictions.csv'
+[INFO    main                 ] input filename[   15]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/FRT_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/FRT_test_predictions.csv'
+[INFO    main                 ] input filename[   16]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/GEN_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/GEN_test_predictions.csv'
+[INFO    main                 ] input filename[   17]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/HUM_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/HUM_test_predictions.csv'
+[INFO    main                 ] input filename[   18]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/IDXX_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/IDXX_test_predictions.csv'
+[INFO    main                 ] input filename[   19]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/IEX_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/IEX_test_predictions.csv'
+[INFO    main                 ] input filename[   20]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/JBHT_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/JBHT_test_predictions.csv'
+[INFO    main                 ] input filename[   21]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/JBL_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/JBL_test_predictions.csv'
+[INFO    main                 ] input filename[   22]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/KEY_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/KEY_test_predictions.csv'
+[INFO    main                 ] input filename[   23]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/KIM_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/KIM_test_predictions.csv'
+[INFO    main                 ] input filename[   24]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/LII_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/LII_test_predictions.csv'
+[INFO    main                 ] input filename[   25]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/LNT_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/LNT_test_predictions.csv'
+[INFO    main                 ] input filename[   26]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/LUV_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/LUV_test_predictions.csv'
+[INFO    main                 ] input filename[   27]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/LVS_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/LVS_test_predictions.csv'
+[INFO    main                 ] input filename[   28]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/MAS_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/MAS_test_predictions.csv'
+[INFO    main                 ] input filename[   29]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/MLM_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/MLM_test_predictions.csv'
+[INFO    main                 ] input filename[   30]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/MOH_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/MOH_test_predictions.csv'
+[INFO    main                 ] input filename[   31]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/MTD_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/MTD_test_predictions.csv'
+[INFO    main                 ] input filename[   32]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/NTAP_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/NTAP_test_predictions.csv'
+[INFO    main                 ] input filename[   33]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/ON_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/ON_test_predictions.csv'
+[INFO    main                 ] input filename[   34]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/PAYX_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/PAYX_test_predictions.csv'
+[INFO    main                 ] input filename[   35]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/PEG_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/PEG_test_predictions.csv'
+[INFO    main                 ] input filename[   36]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/PFG_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/PFG_test_predictions.csv'
+[INFO    main                 ] input filename[   37]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/PHM_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/PHM_test_predictions.csv'
+[INFO    main                 ] input filename[   38]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/PKG_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/PKG_test_predictions.csv'
+[INFO    main                 ] input filename[   39]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/RL_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/RL_test_predictions.csv'
+[INFO    main                 ] input filename[   40]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/RVTY_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/RVTY_test_predictions.csv'
+[INFO    main                 ] input filename[   41]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/STLD_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/STLD_test_predictions.csv'
+[INFO    main                 ] input filename[   42]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/SYY_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/SYY_test_predictions.csv'
+[INFO    main                 ] input filename[   43]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/TPR_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/TPR_test_predictions.csv'
+[INFO    main                 ] input filename[   44]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/TRMB_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/TRMB_test_predictions.csv'
+[INFO    main                 ] input filename[   45]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/TROW_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/TROW_test_predictions.csv'
+[INFO    main                 ] input filename[   46]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/UHS_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/UHS_test_predictions.csv'
+[INFO    main                 ] input filename[   47]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/WST_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/WST_test_predictions.csv'
+[INFO    main                 ] input filename[   48]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/WTW_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/WTW_test_predictions.csv'
+[INFO    main                 ] input filename[   49]: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/datasets/panels_core7_examm_2022/set2/ZBRA_test.csv'
+[INFO    main                 ] output filename: '/Users/rsch_lopedieg@kean.edu/EXAMM-Extended/test_output/core7_examm_ret_2022/set3/20/evaluation_test_on_set2/ZBRA_test_predictions.csv'
