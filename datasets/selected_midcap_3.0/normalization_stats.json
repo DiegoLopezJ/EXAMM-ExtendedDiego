@@ -1,0 +1,31 @@
+{
+  "RET": {
+    "mean": 0.0006811780908379407,
+    "std": 0.024479321615065577
+  },
+  "VOL_CHANGE": {
+    "mean": 0.1208393909744464,
+    "std": 0.7793907651453682
+  },
+  "BA_SPREAD": {
+    "mean": 0.0022794900946420506,
+    "std": 0.00683988077030381
+  },
+  "ILLIQUIDITY": {
+    "mean": -4.208055713891474e-12,
+    "std": 5.344113499037068e-09
+  },
+  "TURNOVER": {
+    "mean": 9.882213361544991,
+    "std": 9.62982687630007
+  },
+  "SPRTRN": {
+    "mean": 0.00019141263349238812,
+    "std": 0.012285352617517932
+  },
+  "_info": {
+    "computed_on": "train rows only, pooled over 18 stocks (79218 rows), population std (ddof=0)",
+    "inverse": "X = X_z * std + mean",
+    "source": "Financial_toolbox/build_dataset/CRSP_Company.py definitions; VOL_CHANGE split-adjusted with FACSHR"
+  }
+}

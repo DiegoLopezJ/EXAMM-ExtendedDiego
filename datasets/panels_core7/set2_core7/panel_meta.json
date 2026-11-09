@@ -1,0 +1,139 @@
+{
+ "feature_set": "core7",
+ "set_dir": "/Users/jonathanchang/ONENAS/datasets/mid_highmid_price_clean/set2",
+ "stats_end": "2019-12-31",
+ "common_start": "2004-12-17",
+ "n_stocks": 50,
+ "n_rows": 5043,
+ "n_burn_in_rows": 3785,
+ "first_date": "2004-12-17",
+ "last_date": "2024-12-31",
+ "last_burn_in_date": "2019-12-31",
+ "dates_index_anchor": {
+  "0": "2004-12-17",
+  "5042": "2024-12-31"
+ },
+ "columns": [
+  "RET",
+  "RET_CS_IN",
+  "BA_SPREAD",
+  "ILLIQUIDITY",
+  "REV21_1",
+  "TURN_RATIO",
+  "VOL21",
+  "RET_CS",
+  "RET_CS_Z",
+  "RET_CS5"
+ ],
+ "target_columns": [
+  "RET_CS",
+  "RET_CS_Z",
+  "RET_CS5"
+ ],
+ "feature_columns": [
+  "RET",
+  "RET_CS_IN",
+  "BA_SPREAD",
+  "ILLIQUIDITY",
+  "REV21_1",
+  "TURN_RATIO",
+  "VOL21"
+ ],
+ "pooled_robust_z_columns": [
+  "RET"
+ ],
+ "cs_rank_pm1_columns": [
+  "BA_SPREAD",
+  "ILLIQUIDITY",
+  "REV21_1",
+  "TURN_RATIO",
+  "VOL21"
+ ],
+ "clip": 8.0,
+ "stats": {
+  "RET": {
+   "median": 0.000612,
+   "iqr": 0.018022,
+   "n": 189250,
+   "source": "pooled rows <= 2019-12-31"
+  }
+ },
+ "flags": {
+  "drop_sprtrn": false,
+  "add_exret": false,
+  "add_rev5": false,
+  "cs_rank_features": false
+ },
+ "raw_columns": [],
+ "recipes": {
+  "RET": "robust z of raw simple return (burn-in median/IQR, clip +/-8)",
+  "RET_CS_IN": "exact duplicate of RET_CS under a distinct name so a run can list it in --input_parameter_names while RET_CS stays in --output_parameter_names (safe default: one column in both lists is unverified in the C++)",
+  "BA_SPREAD": "per-date cross-sectional rank in [-1,1] (Gu-Kelly-Xiu)",
+  "ILLIQUIDITY": "abs(raw signed Amihud) -> trailing 21-day mean (expanding first 20 rows) -> log (floor 1e-15) -> per-date cross-sectional rank in [-1,1]",
+  "REV21_1": "prod(1+r)-1 over rows i-20..i-1, EXCLUDES today (0.0 while <2 prior rows) -> per-date cross-sectional rank in [-1,1]",
+  "TURN_RATIO": "mean(log1p(max(TURNOVER,0)), rows i-4..i) - mean(same, rows i-62..i), expanding starts -> per-date cross-sectional rank in [-1,1]",
+  "VOL21": "sample std of raw RET over rows i-20..i (0.0 when <2 obs) -> per-date cross-sectional rank in [-1,1]",
+  "RET_CS": "per-date cross-sectional rank-normal of raw RET: Phi^-1((avg_rank - 0.5)/N), N = n_stocks; contemporaneous, leak-free",
+  "RET_CS_Z": "per-date cross-sectional z-score of raw RET: (r - mean_t)/sd_t (population sd), clip +/-8",
+  "RET_CS5": "FORWARD-LOOKING TARGET: prod(1+r)-1 over rows i+1..i+5 -> per-date cross-sectional rank-normal Phi^-1((avg_rank - 0.5)/N); last 5 rows of the panel are 0.0 placeholders (they fall outside any scored window); NEVER a feature/input"
+ },
+ "raw_returns": {
+  "where": "panel_dates.csv",
+  "columns": [
+   "RET_raw_A",
+   "RET_raw_ATO",
+   "RET_raw_AVY",
+   "RET_raw_BAX",
+   "RET_raw_CBRE",
+   "RET_raw_CLX",
+   "RET_raw_CTRA",
+   "RET_raw_DGX",
+   "RET_raw_DVA",
+   "RET_raw_EQR",
+   "RET_raw_EQT",
+   "RET_raw_ERIE",
+   "RET_raw_EXPD",
+   "RET_raw_FISV",
+   "RET_raw_FITB",
+   "RET_raw_FRT",
+   "RET_raw_GEN",
+   "RET_raw_HUM",
+   "RET_raw_IDXX",
+   "RET_raw_IEX",
+   "RET_raw_JBHT",
+   "RET_raw_JBL",
+   "RET_raw_KEY",
+   "RET_raw_KIM",
+   "RET_raw_LII",
+   "RET_raw_LNT",
+   "RET_raw_LUV",
+   "RET_raw_LVS",
+   "RET_raw_MAS",
+   "RET_raw_MLM",
+   "RET_raw_MOH",
+   "RET_raw_MTD",
+   "RET_raw_NTAP",
+   "RET_raw_ON",
+   "RET_raw_PAYX",
+   "RET_raw_PEG",
+   "RET_raw_PFG",
+   "RET_raw_PHM",
+   "RET_raw_PKG",
+   "RET_raw_RL",
+   "RET_raw_RVTY",
+   "RET_raw_STLD",
+   "RET_raw_SYY",
+   "RET_raw_TPR",
+   "RET_raw_TRMB",
+   "RET_raw_TROW",
+   "RET_raw_UHS",
+   "RET_raw_WST",
+   "RET_raw_WTW",
+   "RET_raw_ZBRA"
+  ],
+  "note": "RET is now normalized in the per-stock CSVs, so the raw simple returns needed for realized-return / trading-book scoring live in panel_dates.csv as RET_raw_<TICKER>, in the same stock order as PRC_/TC_ (sorted ticker order). RET can also be de-normalized as raw = z * stats.RET.iqr + stats.RET.median, but only where z is unclipped."
+ },
+ "no_lookahead": "all pooled normalization statistics come from rows dated <= 2019-12-31 (a strict prefix of the panel, 3785 of 5043 rows); every cross-sectional transform reads only same-date values; every time-axis FEATURE transform (Amihud mean, REV21_1, TURN_RATIO, VOL21) is trailing-only; the single exception is the RET_CS5 TARGET, which is forward-looking by construction",
+ "forward_looking_warning": "RET_CS5 is the ONLY forward-looking column in this panel: it is built from returns at rows i+1..i+5 and is a TARGET for --output_parameter_names ONLY. It must NEVER appear in --input_parameter_names or any feature list. The last 5 rows of the panel carry 0.0 placeholders for RET_CS5 (their forward window runs off the panel; they fall outside any scored window). RET_CS_IN is a safe input-side duplicate of RET_CS.",
+ "ret_cs5_last_rows_zero": 5
+}

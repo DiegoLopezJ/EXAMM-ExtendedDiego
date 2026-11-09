@@ -1,0 +1,35 @@
+{
+  "RET": {
+    "mean": 0.0006869894644758863,
+    "std": 0.02432986353525072
+  },
+  "SPRTRN": {
+    "mean": 0.0002013870378822456,
+    "std": 0.012264307382957288
+  },
+  "XRET": {
+    "mean": 0.00048560242659364064,
+    "std": 0.021146575057595773
+  },
+  "SPREAD": {
+    "mean": 0.0022104892099488517,
+    "std": 0.006587615289151151
+  },
+  "GAP": {
+    "mean": 0.00015841812886790196,
+    "std": 0.012225802457555477
+  },
+  "INTRADAY": {
+    "mean": 0.0004551272555028796,
+    "std": 0.02131532997619744
+  },
+  "VOL_REL": {
+    "mean": -0.08336049792563748,
+    "std": 0.4279075949132315
+  },
+  "_info": {
+    "computed_on": "train rows only, pooled over 18 stocks (78876 rows), population std (ddof=0)",
+    "inverse": "x = x_z * std + mean",
+    "source": "/anvil/scratch/x-dlopez6/experiments/EXAMM-Extended/datasets/selected_midcap_701515"
+  }
+}
