@@ -19,6 +19,11 @@ MSE is shown next to it as a labelled second row.
         python3 plot_core7_alpha.py           Figure 1 / Table 6: net alpha vs MKT + STR1 + STR5 (Driscoll-Kraay)
         python3 plot_core7_pareto_corr.py     does a validation score predict the test result?
    (both take --k 5)
+        python3 core7_results_sections.py     Results section tables: per set and year (retrain / never retrain),
+                                              aggregates, per-panel Sharpe and drawdown, selection objectives,
+                                              Mann-Whitney U and paired Wilcoxon tests -> results/core7_results_sections.xlsx
+   (also takes --k 5; its T2 test needs both the 10/10 and the 5/5 results, i.e. core7_main_results.py run with and
+   without --k 5)
 5. Workbook (Mac):    python3 make_core7_main_workbook.py && open results/core7_main.xlsx      (--k 5 -> core7_main_k5.xlsx)
    Summary / Per set / Table 5 / Table 8: paper (blue), yours MEAN OF 10 SEEDS (yellow, bold), best seed (grey, italic).
    Repeats T7/T8: the mean over seeds in full. Grid / Joined / Rule compared / Model size: the best seed.
