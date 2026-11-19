@@ -26,6 +26,7 @@ using std::vector;
 #include "rnn_node_interface.hxx"
 #include "rnn_recurrent_edge.hxx"
 #include "time_series/time_series.hxx"
+#include "trading_metric.hxx"
 #include "training_loss.hxx"
 #include "weights/weight_rules.hxx"
 #include "weights/weight_update.hxx"
@@ -62,6 +63,9 @@ class RNN_Genome {
 
     double best_validation_mse;
     double best_validation_mae;
+    // validation net return of the trading rule at best_parameters (trading_metric.hxx); -EXAMM_MAX_DOUBLE when not
+    // computed (no --trading_file), NaN when undefined
+    double best_validation_return;
     vector<double> best_parameters;
 
     // Three independent decisions (defaults reproduce the original MSE-only behavior):
@@ -156,6 +160,23 @@ class RNN_Genome {
     double get_best_validation_softmax() const;
     double get_best_validation_mse() const;
     double get_best_validation_mae() const;
+    double get_best_validation_return() const;
+
+    // RET forecasts of every validation series turned into raw-return forecasts and traded with the paper's
+    // long-short rule (trading_metric.hxx, the process-wide validation trading data); the net return, e.g.
+    // 0.05 = +5 %. NaN if a forecast is not finite; exits if no trading data are configured.
+    double get_trading_return(
+        const vector<double>& parameters, const vector<vector<vector<double> > >& inputs,
+        const vector<vector<vector<double> > >& outputs
+    );
+    // after training: the validation return of the kept weights (if trading data are configured), unless the
+    // checkpoint already tracked it
+    void finish_validation_return(
+        const vector<vector<vector<double> > >& validation_inputs,
+        const vector<vector<vector<double> > >& validation_outputs
+    );
+    // the inverse of the time series normalization, for output parameter output_index
+    double denormalize_output(int32_t output_index, double value) const;
 
     void set_normalize_bounds(
         string _normalize_type, const map<string, double>& _normalize_mins, const map<string, double>& _normalize_maxs,

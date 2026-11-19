@@ -19,3 +19,6 @@ target_link_libraries(evaluate_rnns_multi_offset examm_strategy exact_common exa
 add_executable(rnn_statistics rnn_statistics.cxx)
 target_link_libraries(rnn_statistics examm_strategy exact_common exact_time_series exact_weights examm_nn  ${MPI_LIBRARIES} ${MPI_EXTRA} ${MYSQL_LIBRARIES} pthread)
 
+
+add_executable(evaluate_trading_return evaluate_trading_return.cxx)
+target_link_libraries(evaluate_trading_return examm_strategy exact_common exact_time_series exact_weights examm_nn  ${MPI_LIBRARIES} ${MPI_EXTRA} ${MYSQL_LIBRARIES} pthread)

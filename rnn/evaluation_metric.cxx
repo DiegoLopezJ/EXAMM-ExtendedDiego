@@ -9,6 +9,8 @@ string evaluation_metric_name(EvaluationMetric metric) {
             return "mse";
         case EvaluationMetric::MAE:
             return "mae";
+        case EvaluationMetric::RETURN:
+            return "return";
     }
     return "unknown";
 }
@@ -24,9 +26,14 @@ bool parse_evaluation_metric(const string& name, EvaluationMetric& metric) {
         metric = EvaluationMetric::MAE;
         return true;
     }
+    if (lower == "return") {
+        metric = EvaluationMetric::RETURN;
+        return true;
+    }
     return false;
 }
 
 bool is_valid_evaluation_metric(int32_t value) {
-    return value == (int32_t) EvaluationMetric::MSE || value == (int32_t) EvaluationMetric::MAE;
+    return value == (int32_t) EvaluationMetric::MSE || value == (int32_t) EvaluationMetric::MAE
+           || value == (int32_t) EvaluationMetric::RETURN;
 }

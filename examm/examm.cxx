@@ -42,6 +42,7 @@ using std::to_string;
 #include "rnn/rnn.hxx"
 #include "rnn/rnn_genome.hxx"
 #include "rnn/rnn_node.hxx"
+#include "rnn/trading_metric.hxx"
 #include "rnn/ugrnn_node.hxx"
 #include "speciation_strategy.hxx"
 
@@ -134,6 +135,9 @@ void EXAMM::generate_log() {
         (*log_file) << "Inserted Genomes, Total BP Epochs, Time, Best Val. MAE, Best Val. MSE, Enabled Nodes, Enabled "
                        "Edges, Enabled Rec. Edges";
         (*log_file) << speciation_strategy->get_strategy_information_headers();
+        if (get_validation_trading_data() != nullptr) {
+            (*log_file) << ", Best Val. Return";  // the best genome's validation trading return (--trading_file)
+        }
         (*log_file) << endl;
 
         if (generate_op_log) {
@@ -310,7 +314,11 @@ void EXAMM::update_log() {
                     << "," << best_genome->best_validation_mae << "," << best_genome->best_validation_mse << ","
                     << best_genome->get_enabled_node_count() << "," << best_genome->get_enabled_edge_count() << ","
                     << best_genome->get_enabled_recurrent_edge_count()
-                    << speciation_strategy->get_strategy_information_values() << endl;
+                    << speciation_strategy->get_strategy_information_values();
+        if (get_validation_trading_data() != nullptr) {
+            (*log_file) << "," << best_genome->get_best_validation_return();
+        }
+        (*log_file) << endl;
     }
 }
 

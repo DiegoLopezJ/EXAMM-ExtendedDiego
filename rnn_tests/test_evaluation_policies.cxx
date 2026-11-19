@@ -385,7 +385,7 @@ static void test_training_and_serialization(WeightRules* weight_rules, const str
     char* bytes;
     int32_t length;
     mae_genome->write_to_array(&bytes, length);
-    int32_t policy_bytes = 4 + 4 + (int32_t) string("mse").size() + 4 + 4;
+    int32_t policy_bytes = 4 + 4 + (int32_t) string("mse").size() + 4 + 4 + 8;  // "EVL2" block
     RNN_Genome* old_format = new RNN_Genome(bytes, length - policy_bytes);
     free(bytes);
     check(

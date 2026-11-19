@@ -3,6 +3,7 @@ using std::sort;
 using std::upper_bound;
 
 #include <cmath>
+#include <cstring>
 #include <fstream>
 using std::ifstream;
 using std::istream;
@@ -99,6 +100,7 @@ RNN_Genome::RNN_Genome(
 
     best_validation_mse = EXAMM_MAX_DOUBLE;
     best_validation_mae = EXAMM_MAX_DOUBLE;
+    best_validation_return = -EXAMM_MAX_DOUBLE;
 
     training_loss = default_training_loss();
     checkpoint_metric = EvaluationMetric::MSE;
@@ -200,6 +202,7 @@ RNN_Genome* RNN_Genome::copy() {
 
     other->best_validation_mse = best_validation_mse;
     other->best_validation_mae = best_validation_mae;
+    other->best_validation_return = best_validation_return;
     other->best_parameters = best_parameters;
 
     other->training_loss = training_loss;
@@ -937,6 +940,9 @@ double RNN_Genome::get_fitness() const {
     switch (fitness_metric) {
         case EvaluationMetric::MAE:
             return best_validation_mae;
+        case EvaluationMetric::RETURN:
+            // higher return is better, EXAMM ranks lower fitness as better; unset (-EXAMM_MAX_DOUBLE) -> the worst
+            return -best_validation_return;
         case EvaluationMetric::MSE:
         default:
             return best_validation_mse;
@@ -971,6 +977,18 @@ bool RNN_Genome::update_checkpoint(
     const vector<double>& parameters, double validation_mse, const vector<vector<vector<double> > >& validation_inputs,
     const vector<vector<vector<double> > >& validation_outputs
 ) {
+    if (checkpoint_metric == EvaluationMetric::RETURN) {
+        double validation_return = get_trading_return(parameters, validation_inputs, validation_outputs);
+        if (validation_return > best_validation_return) {
+            best_validation_return = validation_return;
+            best_validation_mse = validation_mse;
+            best_validation_mae = get_mae(parameters, validation_inputs, validation_outputs);
+            best_parameters = parameters;
+            return true;
+        }
+        return false;
+    }
+
     if (checkpoint_metric == EvaluationMetric::MAE) {
         double validation_mae = get_mae(parameters, validation_inputs, validation_outputs);
         if (validation_mae < best_validation_mae) {
@@ -1010,6 +1028,87 @@ int32_t RNN_Genome::get_generated_by(string type) {
 
 bool RNN_Genome::sanity_check() {
     return true;
+}
+
+double RNN_Genome::get_best_validation_return() const {
+    return best_validation_return;
+}
+
+double RNN_Genome::denormalize_output(int32_t output_index, double value) const {
+    // the same arithmetic as TimeSeriesSets::denormalize, so forecasts match evaluate_rnn's prediction files
+    const string& field_name = output_parameter_names[output_index];
+    if (normalize_type.compare("min_max") == 0) {
+        double min = normalize_mins.at(field_name);
+        double max = normalize_maxs.at(field_name);
+        return (value * (max - min)) + min;
+    } else if (normalize_type.compare("avg_std_dev") == 0) {
+        double min = normalize_mins.at(field_name);
+        double max = normalize_maxs.at(field_name);
+        double avg = normalize_avgs.at(field_name);
+        double std_dev = normalize_std_devs.at(field_name);
+        double norm_min = (min - avg) / std_dev;
+        double norm_max = (max - avg) / std_dev;
+        norm_max = fmax(norm_min, norm_max);
+        return (value * norm_max * std_dev) + avg;
+    }
+    return value;  // "none" (or not set)
+}
+
+double RNN_Genome::get_trading_return(
+    const vector<double>& parameters, const vector<vector<vector<double> > >& inputs,
+    const vector<vector<vector<double> > >& outputs
+) {
+    const TradingData* data = get_validation_trading_data();
+    if (data == nullptr) {
+        Log::fatal("ERROR: the trading return was requested but no trading data are configured (--trading_file)\n");
+        exit(1);
+    }
+    if (inputs.size() != data->stocks.size()) {
+        Log::fatal(
+            "ERROR: %d validation series but %d stocks in the trading data\n", (int32_t) inputs.size(),
+            (int32_t) data->stocks.size()
+        );
+        exit(1);
+    }
+    if (output_parameter_names.size() != 1) {
+        Log::fatal("ERROR: the trading return needs exactly one output parameter (the return forecast)\n");
+        exit(1);
+    }
+
+    vector<vector<double> > predictions = get_predictions(parameters, inputs, outputs);
+    vector<vector<double> > raw(predictions.size());
+    for (int32_t i = 0; i < (int32_t) predictions.size(); i++) {
+        if (predictions[i].size() > data->prices[i].size()) {
+            Log::fatal(
+                "ERROR: stock %s has %d validation forecasts but only %d trading rows\n", data->stocks[i].c_str(),
+                (int32_t) predictions[i].size(), (int32_t) data->prices[i].size()
+            );
+            exit(1);
+        }
+        raw[i].resize(predictions[i].size());
+        for (int32_t t = 0; t < (int32_t) predictions[i].size(); t++) {
+            double forecast = denormalize_output(0, predictions[i][t]) * data->ret_iqr + data->ret_median;
+            if (!std::isfinite(forecast)) {
+                return NAN;
+            }
+            raw[i][t] = forecast;
+        }
+    }
+    return paper_long_short(raw, data->prices, data->costs, get_trading_k(), true, data->stocks).total_return;
+}
+
+void RNN_Genome::finish_validation_return(
+    const vector<vector<vector<double> > >& validation_inputs,
+    const vector<vector<vector<double> > >& validation_outputs
+) {
+    if (checkpoint_metric == EvaluationMetric::RETURN) {
+        return;  // tracked at every checkpoint
+    }
+    if (get_validation_trading_data() != nullptr) {
+        best_validation_return = get_trading_return(best_parameters, validation_inputs, validation_outputs);
+    } else {
+        best_validation_return = -EXAMM_MAX_DOUBLE;
+    }
 }
 
 void forward_pass_thread_regression(
@@ -1113,6 +1212,9 @@ void RNN_Genome::backpropagate(
     double validation_mse = get_mse(parameters, validation_inputs, validation_outputs);
     best_validation_mse = validation_mse;
     best_validation_mae = get_mae(parameters, validation_inputs, validation_outputs);
+    best_validation_return = checkpoint_metric == EvaluationMetric::RETURN
+                                 ? get_trading_return(parameters, validation_inputs, validation_outputs)
+                                 : -EXAMM_MAX_DOUBLE;
     best_parameters = parameters;
 
     norm = weight_update_method->get_norm(analytic_gradient);
@@ -1151,6 +1253,7 @@ void RNN_Genome::backpropagate(
         delete g;
     }
     this->set_weights(best_parameters);
+    finish_validation_return(validation_inputs, validation_outputs);
 }
 
 void RNN_Genome::backpropagate_stochastic(
@@ -1198,6 +1301,9 @@ void RNN_Genome::backpropagate_stochastic(
     double validation_mse = get_mse(parameters, validation_inputs, validation_outputs);
     best_validation_mse = validation_mse;
     best_validation_mae = get_mae(parameters, validation_inputs, validation_outputs);
+    best_validation_return = checkpoint_metric == EvaluationMetric::RETURN
+                                 ? get_trading_return(parameters, validation_inputs, validation_outputs)
+                                 : -EXAMM_MAX_DOUBLE;
     best_parameters = parameters;
 
     Log::trace("got initial mses.\n");
@@ -1235,6 +1341,7 @@ void RNN_Genome::backpropagate_stochastic(
                 best_parameters = parameters;
                 this->best_validation_mse = NAN;
                 this->best_validation_mae = NAN;
+                this->best_validation_return = NAN;
                 return;
             }
 
@@ -1265,6 +1372,13 @@ void RNN_Genome::backpropagate_stochastic(
     }
     delete rnn;
     this->set_weights(best_parameters);
+    finish_validation_return(validation_inputs, validation_outputs);
+    if (get_validation_trading_data() != nullptr) {
+        Log::info(
+            "best validation mse: %lf, validation return of the kept weights: %lf\n", best_validation_mse,
+            best_validation_return
+        );
+    }
     Log::info("backpropagation completed, getting mu/sigma\n");
     double _mu, _sigma;
     get_mu_sigma(best_parameters, _mu, _sigma);
@@ -3631,17 +3745,36 @@ void RNN_Genome::read_from_stream(istream& bin_istream) {
 
 // The evaluation policies are appended after everything else, behind a marker, so genome files written before
 // they existed still load (with the original MSE / MSE / MSE behavior), and older readers ignore the extra bytes.
-static const int32_t EVALUATION_POLICIES_MARKER = 0x45564C31;  // "EVL1"
+//   "EVL1": training loss name, checkpoint metric, fitness metric
+//   "EVL2": the same + the validation return of the kept weights (written now)
+// EXAMM-MO genomes (examm-mo-original) carry their own block ("MOBJ" + its second objective) at the same place;
+// it is skipped, so their files load here as ordinary single-objective genomes.
+static const int32_t EVALUATION_POLICIES_MARKER_V1 = 0x45564C31;  // "EVL1"
+static const int32_t EVALUATION_POLICIES_MARKER_V2 = 0x45564C32;  // "EVL2"
 
 void RNN_Genome::read_evaluation_policies(istream& bin_istream) {
     training_loss = default_training_loss();
     checkpoint_metric = EvaluationMetric::MSE;
     fitness_metric = EvaluationMetric::MSE;
+    best_validation_return = -EXAMM_MAX_DOUBLE;
 
     std::streampos start = bin_istream.tellg();
+    char tag[4];
+    if (bin_istream.read(tag, 4) && memcmp(tag, "MOBJ", 4) == 0) {
+        double mo_second_objective;
+        bin_istream.read((char*) &mo_second_objective, sizeof(double));
+        Log::debug("skipped an EXAMM-MO block (second objective %lf)\n", mo_second_objective);
+    } else {
+        bin_istream.clear();
+        if (start != std::streampos(-1)) {
+            bin_istream.seekg(start);
+        }
+    }
+
+    start = bin_istream.tellg();
     int32_t marker = 0;
     bin_istream.read((char*) &marker, sizeof(int32_t));
-    if (!bin_istream || marker != EVALUATION_POLICIES_MARKER) {
+    if (!bin_istream || (marker != EVALUATION_POLICIES_MARKER_V1 && marker != EVALUATION_POLICIES_MARKER_V2)) {
         // an older genome: nothing more to read; leave the stream where it was
         bin_istream.clear();
         if (start != std::streampos(-1)) {
@@ -3656,6 +3789,10 @@ void RNN_Genome::read_evaluation_policies(istream& bin_istream) {
     int32_t checkpoint_value = -1, fitness_value = -1;
     bin_istream.read((char*) &checkpoint_value, sizeof(int32_t));
     bin_istream.read((char*) &fitness_value, sizeof(int32_t));
+    double validation_return = -EXAMM_MAX_DOUBLE;
+    if (marker == EVALUATION_POLICIES_MARKER_V2) {
+        bin_istream.read((char*) &validation_return, sizeof(double));
+    }
 
     if (!bin_istream) {
         Log::fatal("ERROR: genome stream ended inside its evaluation policies\n");
@@ -3677,6 +3814,7 @@ void RNN_Genome::read_evaluation_policies(istream& bin_istream) {
     training_loss = loss;
     checkpoint_metric = (EvaluationMetric) checkpoint_value;
     fitness_metric = (EvaluationMetric) fitness_value;
+    best_validation_return = validation_return;
     Log::debug(
         "evaluation policies: training loss %s, checkpoint %s, fitness %s\n", loss_name.c_str(),
         evaluation_metric_name(checkpoint_metric).c_str(), evaluation_metric_name(fitness_metric).c_str()
@@ -3684,13 +3822,14 @@ void RNN_Genome::read_evaluation_policies(istream& bin_istream) {
 }
 
 void RNN_Genome::write_evaluation_policies(ostream& bin_ostream) {
-    int32_t marker = EVALUATION_POLICIES_MARKER;
+    int32_t marker = EVALUATION_POLICIES_MARKER_V2;
     bin_ostream.write((char*) &marker, sizeof(int32_t));
     write_binary_string(bin_ostream, training_loss->get_name(), "training_loss");
     int32_t checkpoint_value = (int32_t) checkpoint_metric;
     int32_t fitness_value = (int32_t) fitness_metric;
     bin_ostream.write((char*) &checkpoint_value, sizeof(int32_t));
     bin_ostream.write((char*) &fitness_value, sizeof(int32_t));
+    bin_ostream.write((char*) &best_validation_return, sizeof(double));
 }
 
 void RNN_Genome::write_to_array(char** bytes, int32_t& length) {
@@ -4311,6 +4450,7 @@ void RNN_Genome::transfer_to(
 
     best_validation_mse = EXAMM_MAX_DOUBLE;
     best_validation_mae = EXAMM_MAX_DOUBLE;
+    best_validation_return = -EXAMM_MAX_DOUBLE;
 
     get_mu_sigma(best_parameters, mu, sigma);
     Log::info("after transfer, mu: %lf, sigma: %lf\n", mu, sigma);

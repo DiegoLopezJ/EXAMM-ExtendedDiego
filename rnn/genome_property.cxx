@@ -21,7 +21,7 @@ static EvaluationMetric evaluation_metric_argument(const vector<string>& argumen
     EvaluationMetric metric = EvaluationMetric::MSE;
     string value;
     if (get_argument(arguments, flag, false, value) && !parse_evaluation_metric(value, metric)) {
-        Log::fatal("ERROR: unknown %s '%s', options are: mse, mae\n", flag.c_str(), value.c_str());
+        Log::fatal("ERROR: unknown %s '%s', options are: mse, mae, return\n", flag.c_str(), value.c_str());
         exit(1);
     }
     return metric;
