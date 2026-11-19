@@ -100,6 +100,10 @@ RNN_Genome::RNN_Genome(
     best_validation_mse = EXAMM_MAX_DOUBLE;
     best_validation_mae = EXAMM_MAX_DOUBLE;
 
+    training_loss = default_training_loss();
+    checkpoint_metric = EvaluationMetric::MSE;
+    fitness_metric = EvaluationMetric::MSE;
+
     nodes = _nodes;
     edges = _edges;
     recurrent_edges = _recurrent_edges;
@@ -197,6 +201,10 @@ RNN_Genome* RNN_Genome::copy() {
     other->best_validation_mse = best_validation_mse;
     other->best_validation_mae = best_validation_mae;
     other->best_parameters = best_parameters;
+
+    other->training_loss = training_loss;
+    other->checkpoint_metric = checkpoint_metric;
+    other->fitness_metric = fitness_metric;
 
     other->input_parameter_names = input_parameter_names;
     other->output_parameter_names = output_parameter_names;
@@ -926,8 +934,62 @@ void RNN_Genome::set_generation_id(int32_t _generation_id) {
 }
 
 double RNN_Genome::get_fitness() const {
-    return best_validation_mse;
-    // return best_validation_mae;
+    switch (fitness_metric) {
+        case EvaluationMetric::MAE:
+            return best_validation_mae;
+        case EvaluationMetric::MSE:
+        default:
+            return best_validation_mse;
+    }
+}
+
+void RNN_Genome::set_training_loss(const TrainingLoss* _training_loss) {
+    training_loss = _training_loss == nullptr ? default_training_loss() : _training_loss;
+}
+
+const TrainingLoss* RNN_Genome::get_training_loss() const {
+    return training_loss;
+}
+
+void RNN_Genome::set_checkpoint_metric(EvaluationMetric metric) {
+    checkpoint_metric = metric;
+}
+
+EvaluationMetric RNN_Genome::get_checkpoint_metric() const {
+    return checkpoint_metric;
+}
+
+void RNN_Genome::set_fitness_metric(EvaluationMetric metric) {
+    fitness_metric = metric;
+}
+
+EvaluationMetric RNN_Genome::get_fitness_metric() const {
+    return fitness_metric;
+}
+
+bool RNN_Genome::update_checkpoint(
+    const vector<double>& parameters, double validation_mse, const vector<vector<vector<double> > >& validation_inputs,
+    const vector<vector<vector<double> > >& validation_outputs
+) {
+    if (checkpoint_metric == EvaluationMetric::MAE) {
+        double validation_mae = get_mae(parameters, validation_inputs, validation_outputs);
+        if (validation_mae < best_validation_mae) {
+            best_validation_mae = validation_mae;
+            best_validation_mse = validation_mse;
+            best_parameters = parameters;
+            return true;
+        }
+        return false;
+    }
+
+    // MSE (the original rule; MAE is only computed for the weights that are kept)
+    if (validation_mse < best_validation_mse) {
+        best_validation_mse = validation_mse;
+        best_validation_mae = get_mae(parameters, validation_inputs, validation_outputs);
+        best_parameters = parameters;
+        return true;
+    }
+    return false;
 }
 
 double RNN_Genome::get_best_validation_mse() const {
@@ -953,12 +1015,11 @@ bool RNN_Genome::sanity_check() {
 void forward_pass_thread_regression(
     RNN* rnn, const vector<double>& parameters, const vector<vector<double> >& inputs,
     const vector<vector<double> >& outputs, int32_t i, double* mses, bool use_dropout, bool training,
-    double dropout_probability
+    double dropout_probability, const TrainingLoss* training_loss
 ) {
     rnn->set_weights(parameters);
     rnn->forward_pass(inputs, use_dropout, training, dropout_probability);
-    mses[i] = rnn->calculate_error_mse(outputs);
-    // mses[i] = rnn->calculate_error_mae(outputs);
+    mses[i] = rnn->calculate_training_loss(training_loss, outputs);
 
     Log::trace("mse[%d]: %lf\n", i, mses[i]);
 }
@@ -986,7 +1047,7 @@ void RNN_Genome::get_analytic_gradient(
     for (int32_t i = 0; i < (int32_t) rnns.size(); i++) {
         threads.push_back(thread(
             forward_pass_thread_regression, rnns[i], parameters, inputs[i], outputs[i], i, mses, use_dropout, training,
-            dropout_probability
+            dropout_probability, training_loss
         ));
     }
 
@@ -997,9 +1058,8 @@ void RNN_Genome::get_analytic_gradient(
     delete[] mses;
 
     for (int32_t i = 0; i < (int32_t) rnns.size(); i++) {
-        double d_mse = 0.0;
-        d_mse = mse_sum * (1.0 / outputs[i][0].size()) * 2.0;
-        rnns[i]->backward_pass(d_mse, use_dropout, training, dropout_probability);
+        double d_loss = training_loss->backward_scale(mse_sum, (int32_t) outputs[i][0].size());
+        rnns[i]->backward_pass(d_loss, use_dropout, training, dropout_probability);
     }
 
     mse = mse_sum;
@@ -1064,11 +1124,7 @@ void RNN_Genome::backpropagate(
         get_analytic_gradient(rnns, parameters, inputs, outputs, mse, analytic_gradient, true);
         this->set_weights(parameters);
         validation_mse = get_mse(parameters, validation_inputs, validation_outputs);
-        if (validation_mse < best_validation_mse) {
-            best_validation_mse = validation_mse;
-            best_validation_mae = get_mae(parameters, validation_inputs, validation_outputs);
-            best_parameters = parameters;
-        }
+        update_checkpoint(parameters, validation_mse, validation_inputs, validation_outputs);
         norm = weight_update_method->get_norm(analytic_gradient);
         if (output_log != NULL) {
             (*output_log) << iteration << " " << mse << " " << validation_mse << " " << best_validation_mse << endl;
@@ -1130,7 +1186,8 @@ void RNN_Genome::backpropagate_stochastic(
             i, n_series, parameters.size(), inputs.size(), outputs.size(), log_filename.c_str()
         );
         rnn->get_analytic_gradient(
-            parameters, inputs[i], outputs[i], mse, analytic_gradient, use_dropout, true, dropout_probability
+            parameters, inputs[i], outputs[i], mse, analytic_gradient, use_dropout, true, dropout_probability,
+            training_loss
         );
         Log::trace("got analytic gradient.\n");
         norm = weight_update_method->get_norm(analytic_gradient);
@@ -1164,7 +1221,7 @@ void RNN_Genome::backpropagate_stochastic(
             prev_gradient = analytic_gradient;
             rnn->get_analytic_gradient(
                 parameters, inputs[random_selection], outputs[random_selection], mse, analytic_gradient, use_dropout,
-                true, dropout_probability
+                true, dropout_probability, training_loss
             );
 
             norm = weight_update_method->get_norm(analytic_gradient);
@@ -1194,12 +1251,7 @@ void RNN_Genome::backpropagate_stochastic(
         this->set_weights(parameters);
         double training_mse = get_mse(parameters, inputs, outputs);
         validation_mse = get_mse(parameters, validation_inputs, validation_outputs);
-
-        if (validation_mse < best_validation_mse) {
-            best_validation_mse = validation_mse;
-            best_validation_mae = get_mae(parameters, validation_inputs, validation_outputs);
-            best_parameters = parameters;
-        }
+        update_checkpoint(parameters, validation_mse, validation_inputs, validation_outputs);
         if (output_log != NULL) {
             std::chrono::time_point<std::chrono::system_clock> currentClock = std::chrono::system_clock::now();
             long milliseconds =
@@ -3391,6 +3443,9 @@ void RNN_Genome::read_from_stream(istream& bin_istream) {
     bin_istream.read((char*) &use_dropout, sizeof(bool));
     bin_istream.read((char*) &dropout_probability, sizeof(double));
 
+    // not serialized: was left uninitialized here; examm_mpi's workers set it from --weight_decay after receiving
+    weight_decay = 0.0;
+
     WeightType weight_initialize = WeightType::NONE;
     WeightType weight_inheritance = WeightType::NONE;
     WeightType mutated_component_weight = WeightType::NONE;
@@ -3562,7 +3617,73 @@ void RNN_Genome::read_from_stream(istream& bin_istream) {
     istringstream normalize_std_devs_iss(normalize_std_devs_str);
     read_map(normalize_std_devs_iss, normalize_std_devs);
 
+    read_evaluation_policies(bin_istream);
+
     assign_reachability();
+}
+
+// The evaluation policies are appended after everything else, behind a marker, so genome files written before
+// they existed still load (with the original MSE / MSE / MSE behavior), and older readers ignore the extra bytes.
+static const int32_t EVALUATION_POLICIES_MARKER = 0x45564C31;  // "EVL1"
+
+void RNN_Genome::read_evaluation_policies(istream& bin_istream) {
+    training_loss = default_training_loss();
+    checkpoint_metric = EvaluationMetric::MSE;
+    fitness_metric = EvaluationMetric::MSE;
+
+    std::streampos start = bin_istream.tellg();
+    int32_t marker = 0;
+    bin_istream.read((char*) &marker, sizeof(int32_t));
+    if (!bin_istream || marker != EVALUATION_POLICIES_MARKER) {
+        // an older genome: nothing more to read; leave the stream where it was
+        bin_istream.clear();
+        if (start != std::streampos(-1)) {
+            bin_istream.seekg(start);
+        }
+        Log::debug("no evaluation policies in genome, using the defaults (mse / mse / mse)\n");
+        return;
+    }
+
+    string loss_name;
+    read_binary_string(bin_istream, loss_name, "training_loss");
+    int32_t checkpoint_value = -1, fitness_value = -1;
+    bin_istream.read((char*) &checkpoint_value, sizeof(int32_t));
+    bin_istream.read((char*) &fitness_value, sizeof(int32_t));
+
+    if (!bin_istream) {
+        Log::fatal("ERROR: genome stream ended inside its evaluation policies\n");
+        exit(1);
+    }
+    const TrainingLoss* loss = ::get_training_loss(loss_name);
+    if (loss == nullptr) {
+        Log::fatal(
+            "ERROR: genome uses training loss '%s', which is not registered in this program\n", loss_name.c_str()
+        );
+        exit(1);
+    }
+    if (!is_valid_evaluation_metric(checkpoint_value) || !is_valid_evaluation_metric(fitness_value)) {
+        Log::fatal(
+            "ERROR: genome has an unknown checkpoint (%d) or fitness (%d) metric\n", checkpoint_value, fitness_value
+        );
+        exit(1);
+    }
+    training_loss = loss;
+    checkpoint_metric = (EvaluationMetric) checkpoint_value;
+    fitness_metric = (EvaluationMetric) fitness_value;
+    Log::debug(
+        "evaluation policies: training loss %s, checkpoint %s, fitness %s\n", loss_name.c_str(),
+        evaluation_metric_name(checkpoint_metric).c_str(), evaluation_metric_name(fitness_metric).c_str()
+    );
+}
+
+void RNN_Genome::write_evaluation_policies(ostream& bin_ostream) {
+    int32_t marker = EVALUATION_POLICIES_MARKER;
+    bin_ostream.write((char*) &marker, sizeof(int32_t));
+    write_binary_string(bin_ostream, training_loss->get_name(), "training_loss");
+    int32_t checkpoint_value = (int32_t) checkpoint_metric;
+    int32_t fitness_value = (int32_t) fitness_metric;
+    bin_ostream.write((char*) &checkpoint_value, sizeof(int32_t));
+    bin_ostream.write((char*) &fitness_value, sizeof(int32_t));
 }
 
 void RNN_Genome::write_to_array(char** bytes, int32_t& length) {
@@ -3712,6 +3833,8 @@ void RNN_Genome::write_to_stream(ostream& bin_ostream) {
     write_map(normalize_std_devs_oss, normalize_std_devs);
     string normalize_std_devs_str = normalize_std_devs_oss.str();
     write_binary_string(bin_ostream, normalize_std_devs_str, "normalize_std_devs");
+
+    write_evaluation_policies(bin_ostream);
 }
 
 void RNN_Genome::update_innovation_counts(int32_t& node_innovation_count, int32_t& edge_innovation_count) {

@@ -20,11 +20,13 @@ using std::uniform_real_distribution;
 using std::vector;
 
 #include "common/random.hxx"
+#include "evaluation_metric.hxx"
 #include "rnn.hxx"
 #include "rnn_edge.hxx"
 #include "rnn_node_interface.hxx"
 #include "rnn_recurrent_edge.hxx"
 #include "time_series/time_series.hxx"
+#include "training_loss.hxx"
 #include "weights/weight_rules.hxx"
 #include "weights/weight_update.hxx"
 // #include "word_series/word_series.hxx"
@@ -61,6 +63,14 @@ class RNN_Genome {
     double best_validation_mse;
     double best_validation_mae;
     vector<double> best_parameters;
+
+    // Three independent decisions (defaults reproduce the original MSE-only behavior):
+    const TrainingLoss* training_loss;   // what backpropagation minimizes (not owned)
+    EvaluationMetric checkpoint_metric;  // which epoch's weights are kept as best_parameters
+    EvaluationMetric fitness_metric;     // what get_fitness() returns, i.e. how evolution ranks the genome
+
+    void read_evaluation_policies(istream& bin_istream);
+    void write_evaluation_policies(ostream& bin_ostream);
 
     minstd_rand0 generator;
 
@@ -127,6 +137,22 @@ class RNN_Genome {
     int32_t get_node_count();
 
     double get_fitness() const;
+
+    void set_training_loss(const TrainingLoss* _training_loss);
+    const TrainingLoss* get_training_loss() const;
+    void set_checkpoint_metric(EvaluationMetric metric);
+    EvaluationMetric get_checkpoint_metric() const;
+    void set_fitness_metric(EvaluationMetric metric);
+    EvaluationMetric get_fitness_metric() const;
+
+    // Checkpoint selection: keeps parameters as best_parameters if they improve the checkpoint metric on the
+    // validation data, recording both validation MSE and MAE of the kept weights. validation_mse is the validation
+    // MSE of parameters (already computed by the caller). Returns true if the parameters were kept.
+    bool update_checkpoint(
+        const vector<double>& parameters, double validation_mse,
+        const vector<vector<vector<double> > >& validation_inputs,
+        const vector<vector<vector<double> > >& validation_outputs
+    );
     double get_best_validation_softmax() const;
     double get_best_validation_mse() const;
     double get_best_validation_mae() const;

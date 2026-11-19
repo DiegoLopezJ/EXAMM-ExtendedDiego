@@ -2,6 +2,8 @@
 
 #include "common/arguments.hxx"
 #include "common/log.hxx"
+#include "rnn/evaluation_metric.hxx"
+#include "rnn/training_loss.hxx"
 
 GenomeProperty::GenomeProperty() {
     bp_iterations = 10;
@@ -9,6 +11,20 @@ GenomeProperty::GenomeProperty() {
     weight_decay = 0.0;
     min_recurrent_depth = 1;
     max_recurrent_depth = 10;
+
+    training_loss = default_training_loss();
+    checkpoint_metric = EvaluationMetric::MSE;
+    fitness_metric = EvaluationMetric::MSE;
+}
+
+static EvaluationMetric evaluation_metric_argument(const vector<string>& arguments, const string& flag) {
+    EvaluationMetric metric = EvaluationMetric::MSE;
+    string value;
+    if (get_argument(arguments, flag, false, value) && !parse_evaluation_metric(value, metric)) {
+        Log::fatal("ERROR: unknown %s '%s', options are: mse, mae\n", flag.c_str(), value.c_str());
+        exit(1);
+    }
+    return metric;
 }
 
 void GenomeProperty::generate_genome_property_from_arguments(const vector<string>& arguments) {
@@ -18,6 +34,22 @@ void GenomeProperty::generate_genome_property_from_arguments(const vector<string
 
     get_argument(arguments, "--min_recurrent_depth", false, min_recurrent_depth);
     get_argument(arguments, "--max_recurrent_depth", false, max_recurrent_depth);
+
+    string training_loss_name = "mse";
+    get_argument(arguments, "--training_loss", false, training_loss_name);
+    training_loss = get_training_loss(training_loss_name);
+    if (training_loss == nullptr) {
+        string options;
+        for (const string& name : training_loss_names()) {
+            options += (options.empty() ? "" : ", ") + name;
+        }
+        Log::fatal(
+            "ERROR: unknown --training_loss '%s', options are: %s\n", training_loss_name.c_str(), options.c_str()
+        );
+        exit(1);
+    }
+    checkpoint_metric = evaluation_metric_argument(arguments, "--checkpoint_metric");
+    fitness_metric = evaluation_metric_argument(arguments, "--fitness_metric");
 
     Log::info("Each generated genome is trained for %d epochs\n", bp_iterations);
     Log::info(
@@ -29,6 +61,11 @@ void GenomeProperty::generate_genome_property_from_arguments(const vector<string
         Log::info("L2 weight decay disabled (lambda=0.0)\n");
     }
     Log::info("Min recurrent depth is %d, max recurrent depth is %d\n", min_recurrent_depth, max_recurrent_depth);
+    Log::info(
+        "Training loss: %s, checkpoint selection: lowest validation %s, fitness: validation %s\n",
+        training_loss->get_name().c_str(), evaluation_metric_name(checkpoint_metric).c_str(),
+        evaluation_metric_name(fitness_metric).c_str()
+    );
 }
 
 void GenomeProperty::set_genome_properties(RNN_Genome* genome) {
@@ -37,6 +74,9 @@ void GenomeProperty::set_genome_properties(RNN_Genome* genome) {
         genome->enable_dropout(dropout_probability);
     }
     genome->set_weight_decay(weight_decay);
+    genome->set_training_loss(training_loss);
+    genome->set_checkpoint_metric(checkpoint_metric);
+    genome->set_fitness_metric(fitness_metric);
     genome->normalize_type = normalize_type;
     genome->set_parameter_names(input_parameter_names, output_parameter_names);
     genome->set_normalize_bounds(normalize_type, normalize_mins, normalize_maxs, normalize_avgs, normalize_std_devs);
