@@ -420,6 +420,9 @@ RNN_Genome* EXAMM::generate_genome() {
     if (speciation_strategy->get_evaluated_genomes() > max_genomes) {
         RNN_Genome* global_best_genome = speciation_strategy->get_global_best_genome();
         save_genome(global_best_genome, "global_best_genome");
+        if (is_multi_objective_search()) {
+            speciation_strategy->save_pareto_archive(output_directory);
+        }
 
         if (save_genome_option.compare("entire_population") == 0) {
             speciation_strategy->save_entire_population(output_directory);

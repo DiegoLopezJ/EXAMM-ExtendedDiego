@@ -5,6 +5,9 @@
 #include <string>
 using std::string;
 
+#include <vector>
+using std::vector;
+
 /**
  * A validation metric, used for two independent decisions (each set separately on RNN_Genome):
  *   checkpoint selection: which weights from a genome's training history are kept (the epoch with the lowest value)
@@ -23,5 +26,19 @@ bool parse_evaluation_metric(const string& name, EvaluationMetric& metric);
 
 // true for a value that is a valid EvaluationMetric (used when reading serialized genomes).
 bool is_valid_evaluation_metric(int32_t value);
+
+// A list such as "mse,return" (commas and/or separate words); false if a name is unknown or repeated.
+bool parse_evaluation_metric_list(const vector<string>& words, vector<EvaluationMetric>& metrics);
+
+/**
+ * The search objectives (--objectives mse,return). With fewer than two, the search is single-objective: islands
+ * rank genomes by get_fitness() as in the original EXAMM. With two or more, islands keep and select genomes by
+ * Pareto rank on these validation metrics (NSGA-II: non-dominated fronts, ties by crowding distance) and a global
+ * Pareto archive is kept and saved; get_fitness() is then the FIRST objective, used for the global best genome,
+ * island extinction ranking and the logs. Set once at start-up, where the islands live (the coordinator).
+ */
+void set_search_objectives(const vector<EvaluationMetric>& objectives);
+const vector<EvaluationMetric>& get_search_objectives();
+bool is_multi_objective_search();
 
 #endif

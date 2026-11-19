@@ -51,6 +51,33 @@ void GenomeProperty::generate_genome_property_from_arguments(const vector<string
     checkpoint_metric = evaluation_metric_argument(arguments, "--checkpoint_metric");
     fitness_metric = evaluation_metric_argument(arguments, "--fitness_metric");
 
+    // --objectives mse,return: Pareto search on these validation metrics; fitness (global best, extinction
+    // ranking, logs) is then the first objective
+    vector<string> objective_words;
+    if (get_argument_vector(arguments, "--objectives", false, objective_words)) {
+        vector<EvaluationMetric> objectives;
+        if (!parse_evaluation_metric_list(objective_words, objectives) || objectives.size() < 2) {
+            Log::fatal("ERROR: --objectives needs two or more different metrics from: mse, mae, return\n");
+            exit(1);
+        }
+        if (argument_exists(arguments, "--fitness_metric") && fitness_metric != objectives[0]) {
+            Log::fatal(
+                "ERROR: --fitness_metric %s conflicts with --objectives (fitness is the first objective, %s)\n",
+                evaluation_metric_name(fitness_metric).c_str(), evaluation_metric_name(objectives[0]).c_str()
+            );
+            exit(1);
+        }
+        fitness_metric = objectives[0];
+        set_search_objectives(objectives);
+        string names;
+        for (EvaluationMetric m : objectives) {
+            names += (names.empty() ? "" : ", ") + evaluation_metric_name(m);
+        }
+        Log::info(
+            "Multi-objective search: islands keep genomes by Pareto rank on validation %s (NSGA-II)\n", names.c_str()
+        );
+    }
+
     Log::info("Each generated genome is trained for %d epochs\n", bp_iterations);
     Log::info(
         "Use dropout is set to %s, dropout probability is %f\n", use_dropout ? "True" : "False", dropout_probability

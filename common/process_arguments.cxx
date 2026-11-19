@@ -108,6 +108,10 @@ SpeciationStrategy* generate_speciation_strategy_from_arguments(
         Log::info("Using Island speciation strategy\n");
         speciation_strategy = generate_island_speciation_strategy_from_arguments(arguments, seed_genome);
     } else if (is_neat_strategy(speciation_method)) {
+        if (is_multi_objective_search()) {
+            Log::fatal("ERROR: --objectives (multi-objective search) needs the island speciation strategy, not NEAT\n");
+            exit(1);
+        }
         Log::info("Using Neat speciation strategy\n");
         speciation_strategy = generate_neat_speciation_strategy_from_arguments(arguments, seed_genome);
     } else {
@@ -158,6 +162,12 @@ IslandSpeciationStrategy* generate_island_speciation_strategy_from_arguments(
         islands_to_exterminate, max_genomes, repeat_extinction, start_filled, transfer_learning,
         transfer_learning_version, seed_stirs, tl_epigenetic_weights
     );
+    if (is_multi_objective_search()) {
+        int32_t pareto_archive_size = 50;
+        get_argument(arguments, "--pareto_archive_size", false, pareto_archive_size);
+        island_strategy->set_pareto_archive_size(pareto_archive_size);
+        Log::info("Pareto archive of up to %d genomes\n", pareto_archive_size);
+    }
 
     return island_strategy;
 }

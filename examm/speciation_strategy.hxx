@@ -94,6 +94,14 @@ class SpeciationStrategy {
     virtual void save_entire_population(string output_path) = 0;
 
     /**
+     * Multi-objective search only (--objectives): writes the global Pareto archive
+     * (pareto_genome_<id>.bin/.gv/.txt and pareto_front.csv) to output_path. Strategies without an archive
+     * write nothing.
+     */
+    virtual void save_pareto_archive(string output_path) {
+    }
+
+    /**
      * Applies SHY weight homeostasis: multiplies best_parameters of all genomes by downscale_factor.
      * Called every K genome evaluations to prevent weight magnitude drift.
      * \param downscale_factor is s ∈ (0, 1). Genomes with empty best_parameters are skipped.

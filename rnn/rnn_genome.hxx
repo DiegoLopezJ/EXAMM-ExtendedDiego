@@ -67,6 +67,8 @@ class RNN_Genome {
     // computed (no --trading_file), NaN when undefined
     double best_validation_return;
     vector<double> best_parameters;
+    // multi-objective search: Pareto front + crowding term set by the island (lower is better); not serialized
+    double selection_score;
 
     // Three independent decisions (defaults reproduce the original MSE-only behavior):
     const TrainingLoss* training_loss;   // what backpropagation minimizes (not owned)
@@ -169,6 +171,18 @@ class RNN_Genome {
         const vector<double>& parameters, const vector<vector<vector<double> > >& inputs,
         const vector<vector<vector<double> > >& outputs
     );
+    // the value of one validation metric, oriented so that lower is better (MSE, MAE, -return); unset metrics are
+    // EXAMM_MAX_DOUBLE (worst)
+    double get_objective_value(EvaluationMetric metric) const;
+    // the values of the search objectives (get_search_objectives()), lower is better
+    vector<double> get_objective_values() const;
+    // multi-objective search: no worse than other on every search objective and better on at least one
+    bool dominates(const RNN_Genome* other) const;
+    double get_selection_score() const;
+    void set_selection_score(double score);
+    // sets the recorded validation results of the kept weights (for tests and tools that score genomes elsewhere)
+    void set_validation_scores(double mse, double mae, double validation_return);
+
     // after training: the validation return of the kept weights (if trading data are configured), unless the
     // checkpoint already tracked it
     void finish_validation_return(

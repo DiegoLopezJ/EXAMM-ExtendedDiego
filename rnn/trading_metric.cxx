@@ -244,12 +244,18 @@ void configure_trading_from_arguments(const vector<string>& arguments) {
     get_argument(arguments, "--checkpoint_metric", false, checkpoint);
     get_argument(arguments, "--fitness_metric", false, fitness);
     bool needed = checkpoint == "return" || fitness == "return";
+    vector<string> objective_words;
+    if (get_argument_vector(arguments, "--objectives", false, objective_words)) {
+        for (const string& word : objective_words) {
+            needed = needed || word.find("return") != string::npos;
+        }
+    }
 
     string trading_file;
     if (!get_argument(arguments, "--trading_file", false, trading_file)) {
         if (needed) {
             trading_configuration_error(
-                "ERROR: --checkpoint_metric return / --fitness_metric return need --trading_file\n"
+                "ERROR: --checkpoint_metric / --fitness_metric / --objectives return need --trading_file\n"
             );
         }
         return;

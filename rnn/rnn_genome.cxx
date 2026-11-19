@@ -101,6 +101,7 @@ RNN_Genome::RNN_Genome(
     best_validation_mse = EXAMM_MAX_DOUBLE;
     best_validation_mae = EXAMM_MAX_DOUBLE;
     best_validation_return = -EXAMM_MAX_DOUBLE;
+    selection_score = 0.0;
 
     training_loss = default_training_loss();
     checkpoint_metric = EvaluationMetric::MSE;
@@ -203,6 +204,7 @@ RNN_Genome* RNN_Genome::copy() {
     other->best_validation_mse = best_validation_mse;
     other->best_validation_mae = best_validation_mae;
     other->best_validation_return = best_validation_return;
+    other->selection_score = selection_score;
     other->best_parameters = best_parameters;
 
     other->training_loss = training_loss;
@@ -1032,6 +1034,54 @@ bool RNN_Genome::sanity_check() {
 
 double RNN_Genome::get_best_validation_return() const {
     return best_validation_return;
+}
+
+double RNN_Genome::get_objective_value(EvaluationMetric metric) const {
+    switch (metric) {
+        case EvaluationMetric::MAE:
+            return best_validation_mae;
+        case EvaluationMetric::RETURN:
+            return -best_validation_return;  // unset (-EXAMM_MAX_DOUBLE) -> EXAMM_MAX_DOUBLE, the worst
+        case EvaluationMetric::MSE:
+        default:
+            return best_validation_mse;
+    }
+}
+
+vector<double> RNN_Genome::get_objective_values() const {
+    vector<double> values;
+    for (EvaluationMetric metric : get_search_objectives()) {
+        values.push_back(get_objective_value(metric));
+    }
+    return values;
+}
+
+bool RNN_Genome::dominates(const RNN_Genome* other) const {
+    bool better = false;
+    for (EvaluationMetric metric : get_search_objectives()) {
+        double mine = get_objective_value(metric), theirs = other->get_objective_value(metric);
+        if (mine > theirs) {
+            return false;
+        }
+        if (mine < theirs) {
+            better = true;
+        }
+    }
+    return better;
+}
+
+double RNN_Genome::get_selection_score() const {
+    return selection_score;
+}
+
+void RNN_Genome::set_selection_score(double score) {
+    selection_score = score;
+}
+
+void RNN_Genome::set_validation_scores(double mse, double mae, double validation_return) {
+    best_validation_mse = mse;
+    best_validation_mae = mae;
+    best_validation_return = validation_return;
 }
 
 double RNN_Genome::denormalize_output(int32_t output_index, double value) const {
@@ -3566,6 +3616,7 @@ void RNN_Genome::read_from_stream(istream& bin_istream) {
 
     // not serialized: was left uninitialized here; examm_mpi's workers set it from --weight_decay after receiving
     weight_decay = 0.0;
+    selection_score = 0.0;
 
     WeightType weight_initialize = WeightType::NONE;
     WeightType weight_inheritance = WeightType::NONE;

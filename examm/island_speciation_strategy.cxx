@@ -1,4 +1,10 @@
+#include <algorithm>
 #include <cmath>
+#include <fstream>
+using std::endl;
+using std::ofstream;
+#include <iomanip>
+using std::to_string;
 #include <cstdint>
 #include <functional>
 using std::function;
@@ -174,6 +180,9 @@ int32_t IslandSpeciationStrategy::insert_genome(RNN_Genome* genome) {
         new_global_best = true;
     }
     evaluated_genomes++;
+    if (is_multi_objective_search()) {
+        update_pareto_archive(genome);
+    }
     int32_t island = genome->get_group_id();
 
     Log::info("Island %d: inserting genome\n", island);
@@ -591,6 +600,103 @@ RNN_Genome* IslandSpeciationStrategy::get_seed_genome() {
 void IslandSpeciationStrategy::save_entire_population(string output_path) {
     for (int32_t i = 0; i < (int32_t) islands.size(); i++) {
         islands[i]->save_population(output_path);
+    }
+}
+
+void IslandSpeciationStrategy::set_pareto_archive_size(int32_t size) {
+    pareto_archive_size = size;
+}
+
+void IslandSpeciationStrategy::update_pareto_archive(RNN_Genome* genome) {
+    vector<double> values = genome->get_objective_values();
+    for (double v : values) {
+        if (std::isnan(v) || std::isinf(v) || v >= EXAMM_MAX_DOUBLE) {
+            return;  // untrained, or an objective that is unset / undefined
+        }
+    }
+    for (RNN_Genome* g : pareto_archive) {
+        if (g->dominates(genome) || g->get_objective_values() == values) {
+            return;
+        }
+    }
+    for (auto it = pareto_archive.begin(); it != pareto_archive.end();) {
+        if (genome->dominates(*it)) {
+            delete *it;
+            it = pareto_archive.erase(it);
+        } else {
+            it++;
+        }
+    }
+    RNN_Genome* copy = genome->copy();
+    vector<double> best = copy->get_best_parameters();
+    if (best.size() != 0) {
+        copy->set_weights(best);
+    }
+    copy->set_generation_id(genome->get_generation_id());
+    pareto_archive.push_back(copy);
+
+    // over the cap: drop the genome with the smallest crowding distance; the genomes that are best on any one
+    // objective (the ends of the front) are never dropped
+    while ((int32_t) pareto_archive.size() > pareto_archive_size && (int32_t) pareto_archive.size() > 2) {
+        int32_t n = (int32_t) pareto_archive.size();
+        vector<vector<double> > v(n);
+        for (int32_t i = 0; i < n; i++) {
+            v[i] = pareto_archive[i]->get_objective_values();
+        }
+        int32_t n_objectives = (int32_t) v[0].size();
+        vector<double> crowding(n, 0.0);
+        vector<int32_t> order(n);
+        for (int32_t o = 0; o < n_objectives; o++) {
+            for (int32_t i = 0; i < n; i++) {
+                order[i] = i;
+            }
+            sort(order.begin(), order.end(), [&](int32_t a, int32_t b) { return v[a][o] < v[b][o]; });
+            double range = v[order.back()][o] - v[order.front()][o];
+            crowding[order.front()] = EXAMM_MAX_DOUBLE;
+            crowding[order.back()] = EXAMM_MAX_DOUBLE;
+            for (int32_t k = 1; k + 1 < n; k++) {
+                if (crowding[order[k]] < EXAMM_MAX_DOUBLE && range > 0.0) {
+                    crowding[order[k]] += (v[order[k + 1]][o] - v[order[k - 1]][o]) / range;
+                }
+            }
+        }
+        int32_t most_crowded = (int32_t) (std::min_element(crowding.begin(), crowding.end()) - crowding.begin());
+        if (crowding[most_crowded] >= EXAMM_MAX_DOUBLE) {
+            break;  // every genome is an end of the front (only possible with many objectives)
+        }
+        delete pareto_archive[most_crowded];
+        pareto_archive.erase(pareto_archive.begin() + most_crowded);
+    }
+}
+
+void IslandSpeciationStrategy::save_pareto_archive(string output_path) {
+    if (pareto_archive.empty()) {
+        return;
+    }
+    sort(pareto_archive.begin(), pareto_archive.end(), [](RNN_Genome* a, RNN_Genome* b) {
+        return a->get_fitness() < b->get_fitness();
+    });
+    // one column per search objective, in natural units: val_mse, val_mae, val_return (the net return, higher is
+    // better)
+    ofstream front(output_path + "/pareto_front.csv");
+    front << "genome_id";
+    for (EvaluationMetric metric : get_search_objectives()) {
+        front << ",val_" << evaluation_metric_name(metric);
+    }
+    front << ",enabled_nodes,enabled_edges,enabled_recurrent_edges" << endl;
+    for (RNN_Genome* g : pareto_archive) {
+        string name = output_path + "/pareto_genome_" + to_string(g->get_generation_id());
+        g->write_to_file(name + ".bin");
+        g->write_graphviz(name + ".gv");
+        ofstream equations(name + ".txt");
+        g->write_equations(equations);
+        front << g->get_generation_id() << std::setprecision(10);
+        for (EvaluationMetric metric : get_search_objectives()) {
+            double value = g->get_objective_value(metric);
+            front << "," << (metric == EvaluationMetric::RETURN ? -value : value);
+        }
+        front << "," << g->get_enabled_node_count() << "," << g->get_enabled_edge_count() << ","
+              << g->get_enabled_recurrent_edge_count() << endl;
     }
 }
 
