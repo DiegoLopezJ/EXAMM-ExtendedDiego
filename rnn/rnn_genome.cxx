@@ -1998,11 +1998,12 @@ bool RNN_Genome::add_edge(double mu, double sigma, int32_t& edge_innovation_coun
         }
     }
 
-    /*
-        if (reachable_nodes.size() == 0) {
-            return false;
-        }
-    */
+    // no reachable node: no edge can be added (indexing the empty vector below crashed the master process);
+    // returning false makes EXAMM::mutate try another mutation. Only reached where the original code crashed.
+    if (reachable_nodes.size() == 0) {
+        Log::warning("add_edge: genome %d has no reachable nodes, edge not added\n", generation_id);
+        return false;
+    }
     Log::info("\treachable_nodes.size(): %d\n", reachable_nodes.size());
 
     int32_t position = rng_0_1(generator) * reachable_nodes.size();
@@ -2031,6 +2032,12 @@ bool RNN_Genome::add_edge(double mu, double sigma, int32_t& edge_innovation_coun
     // }
 
     Log::trace("\treachable_nodes.size(): %d\n", reachable_nodes.size());
+
+    // every reachable node has the first node's depth: no forward edge is possible (same crash as above)
+    if (reachable_nodes.size() == 0) {
+        Log::warning("add_edge: genome %d has no reachable node at another depth, edge not added\n", generation_id);
+        return false;
+    }
 
     position = rng_0_1(generator) * reachable_nodes.size();
     RNN_Node_Interface* n2 = reachable_nodes[position];
