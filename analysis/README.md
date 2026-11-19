@@ -1,63 +1,67 @@
-# Portfolio Management System
+# analysis/ — the core7 backtest and reporting scripts (Financial_toolbox)
 
-This repository contains a simple portfolio management system written in Python. It allows users to calculate returns on investment for different stocks based on predicted returns and actual prices.
+These scripts turn EXAMM's core7 forecasts into trading results, tables and figures. On the Mac they are run from a
+copy of this folder, `~/Financial_toolbox`; the EXAMM side (data, runs, forecasts) lives in `~/EXAMM-Extended`.
+
+**Start here:**
+- [`MAIN_WORKFLOW.md`](MAIN_WORKFLOW.md) — the main experiment, step by step (forecasts → backtest → figures → workbook).
+- [`RET_protocol.md`](RET_protocol.md) — the frozen evaluation protocol of the earlier RET results.
+- [`RUN_GENOME_FRONTIER.md`](RUN_GENOME_FRONTIER.md) — the genome Pareto-frontier side experiment.
+
+## Paths
+
+Scripts find their inputs relative to these locations (environment variables override the defaults):
+
+| Variable | Default | Used for |
+|---|---|---|
+| `EXAMM_DIR` | `~/EXAMM-Extended` | `datasets/` (fold files, `panels_core7`) and `test_output/` (EXAMM runs and their `evaluation_*` forecasts) |
+| `CORE7_PANELS` | `$EXAMM_DIR/datasets/panels_core7` | `<set>_core7/panel_dates.csv` (prices, raw returns, costs) and `panel_meta.json` (RET median / IQR) |
+| `FIN_RESULTS_DIR` | `results/` next to the scripts | output folder (`core7_repeats.py`, `main_core7.py`; the other scripts always write to `results/`) |
+
+Intermediate files (rebuilt price / prediction files, trade caches such as `results/genome_frontier/*.npz`) are
+written under `results/` and can be deleted at any time; delete the `*.npz` trade caches after any change to the
+trading code or the forecasts, or the scripts reuse the old trades.
 
 ## Files
 
-- `portfolio.py`: Contains the `Portfolio` class responsible for managing financial portfolios.
-- `stock.py`: Contains the `Stock` class responsible for managing stocks in portfolios.
-- `main.py`: Main script to execute portfolio calculations.
-- `README.md`: This documentation file.
+**Trading engine**
+- `portfolio.py` — `Portfolio`: the trading rules (below), run over a set of `Stock`s.
+- `stock.py` — `Stock`: one position, its prices and transaction costs. With costs on (`use_TC`), a buy pays
+  price + `TRAN_COST` and a sale receives price − `TRAN_COST`, on both the long and the short side (opening a short is a
+  sale, covering it is a buy).
+- `paper_long_short.py` — the paper's Algorithm 1 (daily long-short, rebalanced only when the k-th highest forecast is
+  positive and the k-th lowest negative), built on the `Stock` methods.
+- `ensemble.py` — combining several models' forecasts (`rank_mean`) and their agreement (`mean_pairwise_spearman`).
+- `Logger.py` — logging used by the engine.
 
-## Usage
+**Main experiment** (see `MAIN_WORKFLOW.md`)
+- `core7_main_results.py` — the backtest and report: best seed, mean over the 10 seeds, `--pareto` validation choice.
+- `plot_core7_alpha.py`, `plot_core7_pareto_corr.py`, `plot_core7_main_table5.py` — figures from its CSVs.
+- `core7_results_sections.py` — the Results-section tables and tests.
+- `make_core7_main_workbook.py` — the Excel workbook.
+- `core7_genome_frontier.py` — shared helpers (prices, forecasts, metrics, bootstrap, Pareto) used by the above.
 
-1. Ensure you have Python installed on your system.
-2. Clone this repository to your local machine.
-3. Install the required dependencies by running `pip install pandas`.
-4. Set environment variables for data and results paths (or use the defaults described below).
-5. Define return_strategy in `main.py`.
-6. Run `main.py` to execute the portfolio calculations.
+**Side experiments**
+- `core7_genome_frontier*.py`, `make_genome_frontier_workbook.py` — genome Pareto frontier (`RUN_GENOME_FRONTIER.md`).
+- `core7_mo_frontier.py` — frontier of the multi-objective EXAMM runs.
+- `core7_frontier.py`, `main_core7.py`, `main_core7_protocol.py`, `make_original_rules_workbook.py`, `core7_table.py`,
+  `core7_repeats.py` — the earlier RET protocol (`RET_protocol.md`), rule comparisons and per-repeat results.
+- `core7_paper_tables.py` — workbook of the selection-year experiment.
 
-## Paths and environment variables
+**Checks**
+- `check_cpp_trading_metric.py` — confirms EXAMM's in-search trading return (C++, `rnn/trading_metric.cxx`) equals
+  `paper_long_short.py` on the same forecasts (run from the EXAMM-Extended directory).
 
-Scripts in this repository avoid hard-coded absolute paths. Set these variables to point to your local data:
+## Trading rules in `portfolio.py`
 
-- See `.env.example` for a starter template.
-- `FIN_DATASETS_DIR`: root directory for datasets (default: `./datasets` relative to repo root)
-- `FIN_RESULTS_DIR`: root directory for result outputs (default: `./results` relative to repo root)
-- `CRSP_PROCESSOR_DIR`: root directory for the CRSP processor repo (default: `./CRSP_Processor` relative to repo root)
-- `EXACT_RESULTS_DIR`: root directory for "exact" experiment outputs (default: `./exact` relative to repo root)
-- `FIN_PREDICTION_DIR`, `FIN_TEST_DIR`, `FIN_EXPECTED_DIR`: optional overrides used by specific scripts
-
-## Portfolio Class
-
-The `Portfolio` class contains the following trading strategies:
-
-- `simple_return`: Trade each stock individually based on the predicted return. Each stock has the same initial capital for investment. If predicted return > 0, buy or hold; if predicted return <= 0, sell.
-- `portfolio_simple_return`: At time t, sell all stocks with negative predicted return, and use the gained capital to invest all the stocks with positive capital.
-- `long_short_return`: Short the stocks with predicted negative return, STILL UNDER DEVELOPMENT.
-- `overlapping_return`: Jegadeesh-Titman overlapping portfolios. Each day a
-  new long-short book is formed and held `hold_days`, so `hold_days` books
-  are open at once, each funded with `1/hold_days` of the capital. The books
-  are netted before trading, so a name held by several is held once and only
-  the change in its aggregate notional pays the spread. This is the rule the
-  ONE-NAS paper reports throughout.
-- `banded_return`: Novy-Marx/Velikov buy-hold spread. A name is entered when
-  its predicted rank reaches `entry_rank` and held until that rank falls past
-  `exit_rank`. The dead band between the two removes the churn that small
-  day-to-day rank changes would otherwise cause.
-- `conditional_long_short_return`: Algorithm 1 of the ONE-NAS paper. As
-  `daily_long_short_return`, but it rebalances only on days when the model
-  separates the cross-section by sign. `daily_long_short_return` contains
-  these conditions commented out and so trades unconditionally; this is a
-  separate method so results from that one stay reproducible.
-
-`overlapping_return` and `banded_return` need `Stock.rebalance_to()`, which
-moves a position to a target notional and charges the spread only on the part
-that traded. The existing buy/short and sell/return primitives are
-all-or-nothing and cannot express a position that merely changes size.
-
-`ensemble.py` carries the paper's prediction-combination step: `rank_mean`
-averages the centred ranks of several models (the island champions), and
-`mean_pairwise_spearman` reports how correlated those members are, which is
-what determines whether averaging them buys anything.
+- `daily_long_short_return` — long the top L, short the bottom S forecasts, rebalanced every day.
+- `conditional_long_short_return` — the same, but rebalanced only on days when the forecasts separate the
+  cross-section by sign (the paper's Algorithm 1; `paper_long_short.py` is the version the main results use).
+- `overlapping_return` — Jegadeesh-Titman overlapping books: each day a new long-short book is formed and held
+  `hold_days`, so `hold_days` books are open at once, each with `1/hold_days` of the capital; books are netted, so only
+  the change in a name's total position pays the spread (`Stock.rebalance_to`).
+- `banded_return` — enter a name when its forecast rank reaches `entry_rank`, hold until it falls past `exit_rank`;
+  the band between the two avoids churn from small rank changes.
+- `daily_equal_weight_return`, `buy_and_hold_return` — benchmarks; `short_term_reversal_return` — the reversal
+  benchmark; `simple_return`, `portfolio_simple_return`, `daily_long_return`, `portfolio_shorting_return`,
+  `daily_hybrid_long_short_return`, `long_short_return` — earlier rules, kept for reproducing old results.

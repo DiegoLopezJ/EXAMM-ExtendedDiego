@@ -10,3 +10,7 @@ __pycache__/*
 *.pyc
 visualization/plots/*
 test_output/*
+# regenerable outputs (rebuilt by evaluate_rnn / the analysis scripts); the genomes (*.bin) and fitness logs stay tracked
+test_output/**/evaluation_*/
+analysis/results/core7_repeats_inputs/
+analysis/results/genome_frontier/
