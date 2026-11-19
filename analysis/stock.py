@@ -98,18 +98,17 @@ class Stock:
     def short_stock(self, cash_amount, time):
         # short as many shares as possible, when shorting, their might be existing shares.
         # Returns the actual cash credit for this trade -- equal to cash_amount exactly
-        # when TC is off or trading at bid/ask (unchanged behavior). With TC on, TRAN_COST
-        # already reduces the share count (divided into the price), so crediting the flat
-        # cash_amount target regardless was a bug: the open leg ignored the fee entirely
-        # while the close leg paid it twice (fewer shares, then TC again on cover),
-        # making transaction costs spuriously INCREASE short-side returns. Crediting
-        # shares_shorted * stock_price[time] (the raw-price value of what was ACTUALLY
-        # shorted) instead makes TC a pure drag, symmetric with the long side.
+        # when TC is off or trading at bid/ask (unchanged behavior). With TC on, the position
+        # is sized like buy_stock's (cash_amount / (price + TC) shares), the shares are sold at
+        # price - TC (a sale hits the bid), and return_stock buys them back at price + TC. So a
+        # short round trip pays TC on both legs, exactly like a long one (buy at price + TC,
+        # sell at price - TC). Earlier versions credited the raw price (no cost on the open)
+        # and covered at price - TC, which turned the cost into a gain on the short side.
         if self.use_TC:
             shares_shorted = cash_amount / (self.stock_price[time] + self.transaction_cost[time])
             self.share -= shares_shorted
-            self.sold_price = self.stock_price[time] + self.transaction_cost[time]
-            credited = shares_shorted * self.stock_price[time]
+            self.sold_price = self.stock_price[time] - self.transaction_cost[time]
+            credited = shares_shorted * self.sold_price
             self.logger.log(f"[time {time}]: Shorting company: {self.name} with ${cash_amount}, stock price: {self.stock_price[time]}, transaction cost: {self.transaction_cost[time]}, shares: {self.share}, credited: {credited}", level='DEBUG')
             return credited
         elif self.trade_with_bid_ask:
@@ -129,7 +128,9 @@ class Stock:
         # returned cash amount can be negative
         if self.share < 0:
             if self.use_TC:
-                cash_amount = (self.stock_price[time] - self.transaction_cost[time]) * self.share
+                # covering a short is a BUY, so it pays price + TC (share < 0, so this is a cash outflow
+                # larger than the raw price). It used price - TC, which turned the cost into a gain.
+                cash_amount = (self.stock_price[time] + self.transaction_cost[time]) * self.share
                 self.logger.log(f"[time {time}]: Returning borrowed: {self.name}, shares {self.share}, price  {self.stock_price[time]}, transaction cost {self.transaction_cost[time]}, cash amount: {cash_amount}", level='DEBUG')
             elif self.trade_with_bid_ask:
                 self._require_quotes()

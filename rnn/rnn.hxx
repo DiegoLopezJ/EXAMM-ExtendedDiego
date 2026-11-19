@@ -11,6 +11,7 @@ using std::vector;
 #include "rnn_node_interface.hxx"
 #include "rnn_recurrent_edge.hxx"
 #include "time_series/time_series.hxx"
+#include "training_loss.hxx"
 // #include "word_series/word_series.hxx"
 
 class RNN {
@@ -50,6 +51,8 @@ class RNN {
     double calculate_error_softmax(const vector<vector<double> >& expected_outputs);
     double calculate_error_mse(const vector<vector<double> >& expected_outputs);
     double calculate_error_mae(const vector<vector<double> >& expected_outputs);
+    // runs the training loss on the current outputs: sets each output node's error_values, returns the loss
+    double calculate_training_loss(const TrainingLoss* loss, const vector<vector<double> >& expected_outputs);
 
     double prediction_softmax(
         const vector<vector<double> >& series_data, const vector<vector<double> >& expected_outputs, bool using_dropout,
@@ -84,13 +87,13 @@ class RNN {
 
     void get_analytic_gradient(
         const vector<double>& test_parameters, const vector<vector<double> >& inputs,
-        const vector<vector<double> >& outputs, double& mse, vector<double>& analytic_gradient, bool using_dropout,
-        bool training, double dropout_probability
+        const vector<vector<double> >& outputs, double& loss, vector<double>& analytic_gradient, bool using_dropout,
+        bool training, double dropout_probability, const TrainingLoss* training_loss = nullptr
     );
     void get_empirical_gradient(
         const vector<double>& test_parameters, const vector<vector<double> >& inputs,
-        const vector<vector<double> >& outputs, double& mae, vector<double>& empirical_gradient, bool using_dropout,
-        bool training, double dropout_probability
+        const vector<vector<double> >& outputs, double& loss, vector<double>& empirical_gradient, bool using_dropout,
+        bool training, double dropout_probability, const TrainingLoss* training_loss = nullptr
     );
 
     // RNN* copy();

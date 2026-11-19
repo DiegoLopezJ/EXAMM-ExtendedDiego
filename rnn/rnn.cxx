@@ -545,6 +545,20 @@ double RNN::calculate_error_mae(const vector<vector<double> >& expected_outputs)
     return mae_sum;
 }
 
+double RNN::calculate_training_loss(const TrainingLoss* loss, const vector<vector<double> >& expected_outputs) {
+    vector<vector<double> > predicted(output_nodes.size());
+    for (int32_t i = 0; i < (int32_t) output_nodes.size(); i++) {
+        predicted[i] = output_nodes[i]->output_values;
+    }
+
+    vector<vector<double> > output_errors;
+    double value = loss->compute(predicted, expected_outputs, output_errors);
+    for (int32_t i = 0; i < (int32_t) output_nodes.size(); i++) {
+        output_nodes[i]->error_values = output_errors[i];
+    }
+    return value;
+}
+
 double RNN::prediction_softmax(
     const vector<vector<double> >& series_data, const vector<vector<double> >& expected_outputs, bool using_dropout,
     bool training, double dropout_probability
@@ -651,16 +665,21 @@ void RNN::write_predictions(
 
 void RNN::get_analytic_gradient(
     const vector<double>& test_parameters, const vector<vector<double> >& inputs,
-    const vector<vector<double> >& outputs, double& mse, vector<double>& analytic_gradient, bool using_dropout,
-    bool training, double dropout_probability
+    const vector<vector<double> >& outputs, double& loss, vector<double>& analytic_gradient, bool using_dropout,
+    bool training, double dropout_probability, const TrainingLoss* training_loss
 ) {
+    if (training_loss == nullptr) {
+        training_loss = default_training_loss();
+    }
     analytic_gradient.assign(test_parameters.size(), 0.0);
 
     set_weights(test_parameters);
     forward_pass(inputs, using_dropout, training, dropout_probability);
 
-    mse = calculate_error_mse(outputs);
-    backward_pass(mse * (1.0 / outputs[0].size()) * 2.0, using_dropout, training, dropout_probability);
+    loss = calculate_training_loss(training_loss, outputs);
+    backward_pass(
+        training_loss->backward_scale(loss, (int32_t) outputs[0].size()), using_dropout, training, dropout_probability
+    );
 
     vector<double> current_gradients;
 
@@ -693,20 +712,22 @@ void RNN::get_analytic_gradient(
 
 void RNN::get_empirical_gradient(
     const vector<double>& test_parameters, const vector<vector<double> >& inputs,
-    const vector<vector<double> >& outputs, double& mse, vector<double>& empirical_gradient, bool using_dropout,
-    bool training, double dropout_probability
+    const vector<vector<double> >& outputs, double& loss, vector<double>& empirical_gradient, bool using_dropout,
+    bool training, double dropout_probability, const TrainingLoss* training_loss
 ) {
+    if (training_loss == nullptr) {
+        training_loss = default_training_loss();
+    }
     empirical_gradient.assign(test_parameters.size(), 0.0);
-
-    vector<vector<double> > deltas;
 
     set_weights(test_parameters);
     forward_pass(inputs, using_dropout, training, dropout_probability);
-    double original_mse = calculate_error_mse(outputs);
+    double original_loss = calculate_training_loss(training_loss, outputs);
+    double scale = training_loss->gradient_check_scale(original_loss);
 
     double save;
     double diff = 0.00001;
-    double mse1, mse2;
+    double loss1, loss2;
 
     vector<double> parameters = test_parameters;
     for (int32_t i = 0; i < (int32_t) parameters.size(); i++) {
@@ -715,20 +736,20 @@ void RNN::get_empirical_gradient(
         parameters[i] = save - diff;
         set_weights(parameters);
         forward_pass(inputs, using_dropout, training, dropout_probability);
-        get_mse(this, outputs, mse1, deltas);
+        loss1 = calculate_training_loss(training_loss, outputs);
 
         parameters[i] = save + diff;
         set_weights(parameters);
         forward_pass(inputs, using_dropout, training, dropout_probability);
-        get_mse(this, outputs, mse2, deltas);
+        loss2 = calculate_training_loss(training_loss, outputs);
 
-        empirical_gradient[i] = (mse2 - mse1) / (2.0 * diff);
-        empirical_gradient[i] *= original_mse;
+        empirical_gradient[i] = (loss2 - loss1) / (2.0 * diff);
+        empirical_gradient[i] *= scale;
 
         parameters[i] = save;
     }
 
-    mse = original_mse;
+    loss = original_loss;
 }
 
 void RNN::initialize_randomly() {

@@ -21,6 +21,7 @@ using std::vector;
 #include "common/process_arguments.hxx"
 #include "examm/examm.hxx"
 #include "rnn/generate_nn.hxx"
+#include "rnn/trading_metric.hxx"
 #include "time_series/time_series.hxx"
 #include "weights/weight_rules.hxx"
 #include "weights/weight_update.hxx"
@@ -95,6 +96,9 @@ int main(int argc, char** argv) {
     get_train_validation_data(
         arguments, time_series_sets, training_inputs, training_outputs, validation_inputs, validation_outputs
     );
+    // validation trading return (--trading_file), needed by --checkpoint_metric / --fitness_metric return;
+    // every rank loads it, since workers compute it after training
+    configure_trading_from_arguments(arguments);
 
     weight_update_method = new WeightUpdate();
     weight_update_method->generate_from_arguments(arguments);

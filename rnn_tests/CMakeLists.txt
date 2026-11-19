@@ -83,3 +83,12 @@ add_executable(test_multiply_gp_gradients test_multiply_gp_gradients.cxx gradien
 target_link_libraries(test_multiply_gp_gradients examm_strategy exact_common exact_time_series exact_weights examm_nn  ${MYSQL_LIBRARIES} pthread)
 
 
+
+add_executable(test_evaluation_policies test_evaluation_policies.cxx)
+target_link_libraries(test_evaluation_policies examm_strategy exact_common exact_time_series exact_weights examm_nn   ${MYSQL_LIBRARIES} pthread)
+
+add_executable(test_trading_metric test_trading_metric.cxx)
+target_link_libraries(test_trading_metric examm_strategy exact_common exact_time_series exact_weights examm_nn   ${MYSQL_LIBRARIES} pthread)
+
+add_executable(test_pareto_search test_pareto_search.cxx)
+target_link_libraries(test_pareto_search examm_strategy exact_common exact_time_series exact_weights examm_nn   ${MYSQL_LIBRARIES} pthread)

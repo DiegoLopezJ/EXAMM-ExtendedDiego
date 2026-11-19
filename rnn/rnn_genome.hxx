@@ -20,11 +20,14 @@ using std::uniform_real_distribution;
 using std::vector;
 
 #include "common/random.hxx"
+#include "evaluation_metric.hxx"
 #include "rnn.hxx"
 #include "rnn_edge.hxx"
 #include "rnn_node_interface.hxx"
 #include "rnn_recurrent_edge.hxx"
 #include "time_series/time_series.hxx"
+#include "trading_metric.hxx"
+#include "training_loss.hxx"
 #include "weights/weight_rules.hxx"
 #include "weights/weight_update.hxx"
 // #include "word_series/word_series.hxx"
@@ -60,7 +63,20 @@ class RNN_Genome {
 
     double best_validation_mse;
     double best_validation_mae;
+    // validation net return of the trading rule at best_parameters (trading_metric.hxx); -EXAMM_MAX_DOUBLE when not
+    // computed (no --trading_file), NaN when undefined
+    double best_validation_return;
     vector<double> best_parameters;
+    // multi-objective search: Pareto front + crowding term set by the island (lower is better); not serialized
+    double selection_score;
+
+    // Three independent decisions (defaults reproduce the original MSE-only behavior):
+    const TrainingLoss* training_loss;   // what backpropagation minimizes (not owned)
+    EvaluationMetric checkpoint_metric;  // which epoch's weights are kept as best_parameters
+    EvaluationMetric fitness_metric;     // what get_fitness() returns, i.e. how evolution ranks the genome
+
+    void read_evaluation_policies(istream& bin_istream);
+    void write_evaluation_policies(ostream& bin_ostream);
 
     minstd_rand0 generator;
 
@@ -127,9 +143,54 @@ class RNN_Genome {
     int32_t get_node_count();
 
     double get_fitness() const;
+
+    void set_training_loss(const TrainingLoss* _training_loss);
+    const TrainingLoss* get_training_loss() const;
+    void set_checkpoint_metric(EvaluationMetric metric);
+    EvaluationMetric get_checkpoint_metric() const;
+    void set_fitness_metric(EvaluationMetric metric);
+    EvaluationMetric get_fitness_metric() const;
+
+    // Checkpoint selection: keeps parameters as best_parameters if they improve the checkpoint metric on the
+    // validation data, recording both validation MSE and MAE of the kept weights. validation_mse is the validation
+    // MSE of parameters (already computed by the caller). Returns true if the parameters were kept.
+    bool update_checkpoint(
+        const vector<double>& parameters, double validation_mse,
+        const vector<vector<vector<double> > >& validation_inputs,
+        const vector<vector<vector<double> > >& validation_outputs
+    );
     double get_best_validation_softmax() const;
     double get_best_validation_mse() const;
     double get_best_validation_mae() const;
+    double get_best_validation_return() const;
+
+    // RET forecasts of every validation series turned into raw-return forecasts and traded with the paper's
+    // long-short rule (trading_metric.hxx, the process-wide validation trading data); the net return, e.g.
+    // 0.05 = +5 %. NaN if a forecast is not finite; exits if no trading data are configured.
+    double get_trading_return(
+        const vector<double>& parameters, const vector<vector<vector<double> > >& inputs,
+        const vector<vector<vector<double> > >& outputs
+    );
+    // the value of one validation metric, oriented so that lower is better (MSE, MAE, -return); unset metrics are
+    // EXAMM_MAX_DOUBLE (worst)
+    double get_objective_value(EvaluationMetric metric) const;
+    // the values of the search objectives (get_search_objectives()), lower is better
+    vector<double> get_objective_values() const;
+    // multi-objective search: no worse than other on every search objective and better on at least one
+    bool dominates(const RNN_Genome* other) const;
+    double get_selection_score() const;
+    void set_selection_score(double score);
+    // sets the recorded validation results of the kept weights (for tests and tools that score genomes elsewhere)
+    void set_validation_scores(double mse, double mae, double validation_return);
+
+    // after training: the validation return of the kept weights (if trading data are configured), unless the
+    // checkpoint already tracked it
+    void finish_validation_return(
+        const vector<vector<vector<double> > >& validation_inputs,
+        const vector<vector<vector<double> > >& validation_outputs
+    );
+    // the inverse of the time series normalization, for output parameter output_index
+    double denormalize_output(int32_t output_index, double value) const;
 
     void set_normalize_bounds(
         string _normalize_type, const map<string, double>& _normalize_mins, const map<string, double>& _normalize_maxs,

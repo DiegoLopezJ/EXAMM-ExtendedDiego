@@ -19,6 +19,11 @@ class GenomeProperty {
     int32_t min_recurrent_depth;
     int32_t max_recurrent_depth;
 
+    // --training_loss, --checkpoint_metric, --fitness_metric (independent; all default to mse)
+    const TrainingLoss* training_loss;
+    EvaluationMetric checkpoint_metric;
+    EvaluationMetric fitness_metric;
+
     // TimeSeriesSets *time_series_sets;
     int32_t number_inputs;
     int32_t number_outputs;
