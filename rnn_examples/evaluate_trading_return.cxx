@@ -18,6 +18,7 @@ using std::vector;
 
 #include "common/arguments.hxx"
 #include "common/log.hxx"
+#include "common/process_arguments.hxx"
 #include "rnn/rnn_genome.hxx"
 #include "rnn/trading_metric.hxx"
 #include "time_series/time_series.hxx"
@@ -52,15 +53,7 @@ int main(int argc, char** argv) {
     TimeSeriesSets* time_series_sets = TimeSeriesSets::generate_test(
         testing_filenames, genome->get_input_parameter_names(), genome->get_output_parameter_names()
     );
-    string normalize_type = genome->get_normalize_type();
-    if (normalize_type.compare("min_max") == 0) {
-        time_series_sets->normalize_min_max(genome->get_normalize_mins(), genome->get_normalize_maxs());
-    } else if (normalize_type.compare("avg_std_dev") == 0) {
-        time_series_sets->normalize_avg_std_dev(
-            genome->get_normalize_avgs(), genome->get_normalize_std_devs(), genome->get_normalize_mins(),
-            genome->get_normalize_maxs()
-        );
-    }
+    bool exact = normalize_for_evaluation(arguments, genome, time_series_sets);  // --normalization_files
     vector<vector<vector<double> > > inputs, outputs;
     time_series_sets->export_test_series(time_offset, inputs, outputs);
 
@@ -105,6 +98,7 @@ int main(int argc, char** argv) {
     printf("trading_return_direct %.17g\n", result.total_return);
     printf("days_traded %d of %d\n", result.days_traded, result.days > 0 ? result.days - 1 : 0);
     printf("validation_mse %.17g\n", genome->get_mse(parameters, inputs, outputs));
+    printf("normalization %s\n", exact ? "recomputed from --normalization_files" : "the genome's stored statistics");
     delete genome;
     return through_genome == result.total_return ? 0 : 2;
 }

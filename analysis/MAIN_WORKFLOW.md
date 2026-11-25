@@ -44,3 +44,13 @@ Side experiments (not the main result): core7_genome_frontier*.py (Pareto genome
 3. Backtest (Mac, in ~/Financial_toolbox): python3 core7_pareto_search_results.py   (validation check, choice, test)
 4. Comparison: python3 core7_pareto_search_compare.py -> results/core7_pareto_search_vs_ret.xlsx
    (needs results/core7_main_repeats.csv from core7_main_results.py run with the corrected stock.py)
+
+## Exact normalization for evaluation (applies to core7-ret and the Pareto runs)
+Genome files written before commit "Store normalization statistics at full precision" hold the data-normalization
+statistics rounded to 6 digits, so plain evaluate_rnn fed the networks inputs about 1e-7 off from the search; unstable
+networks then gave different, saturated forecasts (11 of 120 core7-ret genomes, 55 of 1,429 Pareto genomes).
+Re-evaluate with the search's exact statistics (evaluate_rnn --normalization_files <fold train files> <fold val files>):
+1. Anvil: sbatch scripts/rnn_examples/evaluate_core7_exact.sh   (both experiments; writes the usual evaluation_* folders)
+2. Copy the evaluation_* folders to the Mac, delete results/genome_frontier/ (cached forecasts and trades), then rerun
+   core7_main_results.py --pareto, core7_pareto_search_results.py and core7_pareto_search_compare.py.
+Genomes written after the fix store the exact statistics, and plain evaluate_rnn reproduces the search.

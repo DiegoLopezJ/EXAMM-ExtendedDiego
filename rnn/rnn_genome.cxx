@@ -3425,12 +3425,16 @@ void read_map(istream& in, map<string, double>& m) {
 }
 
 void write_map(ostream& out, map<string, double>& m) {
+    // 17 significant digits round-trip a double exactly; the stream default (6) rounded the normalization
+    // statistics, so genomes evaluated later saw inputs about 1e-7 off from the ones they were trained on
+    std::streamsize old_precision = out.precision(17);
     out << m.size();
 
     for (auto iterator = m.begin(); iterator != m.end(); iterator++) {
         out << " " << iterator->first;
         out << " " << iterator->second;
     }
+    out.precision(old_precision);
 }
 
 void read_map(istream& in, map<string, int32_t>& m) {

@@ -1,3 +1,4 @@
+#include <cmath>
 #include <string>
 using std::string;
 
@@ -294,4 +295,78 @@ vector<vector<double> > slice_time_series(
         current_time_series.push_back(current_parameter_slice);
     }
     return current_time_series;
+}
+
+bool normalize_for_evaluation(const vector<string>& arguments, RNN_Genome* genome, TimeSeriesSets* evaluated) {
+    string normalize_type = genome->get_normalize_type();
+    map<string, double> mins = genome->get_normalize_mins(), maxs = genome->get_normalize_maxs();
+    map<string, double> avgs = genome->get_normalize_avgs(), std_devs = genome->get_normalize_std_devs();
+
+    vector<string> normalization_files;
+    bool recompute = get_argument_vector(arguments, "--normalization_files", false, normalization_files)
+                     && normalize_type != "none" && normalize_type != "";
+    if (recompute) {
+        // the same construction as the search: TimeSeriesSets::generate_from_arguments over the same files, in order
+        vector<string> search_arguments{"normalization", "--filenames"};
+        search_arguments.insert(search_arguments.end(), normalization_files.begin(), normalization_files.end());
+        search_arguments.push_back("--input_parameter_names");
+        for (const string& name : genome->get_input_parameter_names()) {
+            search_arguments.push_back(name);
+        }
+        search_arguments.push_back("--output_parameter_names");
+        for (const string& name : genome->get_output_parameter_names()) {
+            search_arguments.push_back(name);
+        }
+        search_arguments.push_back("--normalize");
+        search_arguments.push_back(normalize_type);
+        TimeSeriesSets* search_sets = TimeSeriesSets::generate_from_arguments(search_arguments);
+
+        // the recomputed statistics must agree with the genome's (rounded) ones to about 6 digits
+        double worst = 0.0;
+        string worst_field;
+        auto compare = [&](const map<string, double>& stored, const map<string, double>& exact) {
+            for (auto& kv : stored) {
+                auto it = exact.find(kv.first);
+                if (it == exact.end()) {
+                    continue;
+                }
+                double scale = std::max(std::fabs(it->second), 1e-300);
+                double rel = std::fabs(kv.second - it->second) / scale;
+                if (rel > worst) {
+                    worst = rel;
+                    worst_field = kv.first;
+                }
+            }
+        };
+        compare(mins, search_sets->get_normalize_mins());
+        compare(maxs, search_sets->get_normalize_maxs());
+        compare(avgs, search_sets->get_normalize_avgs());
+        compare(std_devs, search_sets->get_normalize_std_devs());
+        if (worst > 1e-4) {
+            Log::fatal(
+                "ERROR: the statistics recomputed from --normalization_files differ from the genome's by %g (field "
+                "%s): these are not the files the genome was trained on\n",
+                worst, worst_field.c_str()
+            );
+            exit(1);
+        }
+        Log::info(
+            "normalization recomputed from %d files (largest relative difference to the genome's stored statistics: "
+            "%g)\n",
+            (int32_t) normalization_files.size(), worst
+        );
+        mins = search_sets->get_normalize_mins();
+        maxs = search_sets->get_normalize_maxs();
+        avgs = search_sets->get_normalize_avgs();
+        std_devs = search_sets->get_normalize_std_devs();
+        delete search_sets;
+        genome->set_normalize_bounds(normalize_type, mins, maxs, avgs, std_devs);
+    }
+
+    if (normalize_type.compare("min_max") == 0) {
+        evaluated->normalize_min_max(mins, maxs);
+    } else if (normalize_type.compare("avg_std_dev") == 0) {
+        evaluated->normalize_avg_std_dev(avgs, std_devs, mins, maxs);
+    }
+    return recompute;
 }

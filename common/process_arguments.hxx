@@ -32,6 +32,21 @@ NeatSpeciationStrategy* generate_neat_speciation_strategy_from_arguments(
     const vector<string>& arguments, RNN_Genome* seed_genome
 );
 
+/**
+ * Normalizes the time series a saved genome is evaluated on (evaluate_rnn, evaluate_trading_return).
+ *
+ * Default: with the statistics stored in the genome file (the original behavior). Genome files written before the
+ * statistics were saved at full precision hold them rounded to 6 significant digits, so the evaluated inputs differ
+ * from the ones the search used by about 1e-7; stable networks are unaffected, unstable ones can give completely
+ * different forecasts.
+ *
+ * --normalization_files <files>: recompute the statistics exactly as the search did, from the same files in the
+ * same order (the run's --training_filenames, then its --validation_filenames), and use them for the evaluated series
+ * and for the genome's output denormalization. Exits if they are far from the genome's stored statistics (wrong
+ * files). Returns true if the statistics were recomputed.
+ */
+bool normalize_for_evaluation(const vector<string>& arguments, RNN_Genome* genome, TimeSeriesSets* evaluated);
+
 bool is_island_strategy(string strategy_name);
 bool is_neat_strategy(string strategy_name);
 void set_island_transfer_learning_parameters(

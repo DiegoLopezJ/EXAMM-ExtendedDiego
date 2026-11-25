@@ -19,6 +19,7 @@ using std::vector;
 
 #include "common/arguments.hxx"
 #include "common/log.hxx"
+#include "common/process_arguments.hxx"
 #include "rnn/rnn_genome.hxx"
 #include "time_series/time_series.hxx"
 
@@ -48,17 +49,9 @@ int main(int argc, char** argv) {
     );
     Log::debug("got time series sets.\n");
 
-    string normalize_type = genome->get_normalize_type();
-    if (normalize_type.compare("min_max") == 0) {
-        time_series_sets->normalize_min_max(genome->get_normalize_mins(), genome->get_normalize_maxs());
-    } else if (normalize_type.compare("avg_std_dev") == 0) {
-        time_series_sets->normalize_avg_std_dev(
-            genome->get_normalize_avgs(), genome->get_normalize_std_devs(), genome->get_normalize_mins(),
-            genome->get_normalize_maxs()
-        );
-    }
-
-    Log::info("normalized type: %s \n", normalize_type.c_str());
+    // the genome's stored statistics, or with --normalization_files exactly the search's (process_arguments.hxx)
+    normalize_for_evaluation(arguments, genome, time_series_sets);
+    Log::info("normalized type: %s \n", genome->get_normalize_type().c_str());
 
     int32_t time_offset = 1;
     get_argument(arguments, "--time_offset", true, time_offset);
