@@ -7,6 +7,8 @@ copy of this folder, `~/Financial_toolbox`; the EXAMM side (data, runs, forecast
 - [`MAIN_WORKFLOW.md`](MAIN_WORKFLOW.md) — the main experiment, step by step (forecasts → backtest → figures → workbook).
 - [`RET_protocol.md`](RET_protocol.md) — the frozen evaluation protocol of the earlier RET results.
 - [`RUN_GENOME_FRONTIER.md`](RUN_GENOME_FRONTIER.md) — the genome Pareto-frontier side experiment.
+- [`PARETO_SEARCH_PROTOCOL.md`](PARETO_SEARCH_PROTOCOL.md) — the Pareto EXAMM search (MSE and return) and how it is
+  chosen, tested and compared with core7-ret.
 
 ## Paths
 
@@ -43,7 +45,9 @@ trading code or the forecasts, or the scripts reuse the old trades.
 
 **Side experiments**
 - `core7_genome_frontier*.py`, `make_genome_frontier_workbook.py` — genome Pareto frontier (`RUN_GENOME_FRONTIER.md`).
-- `core7_mo_frontier.py` — frontier of the multi-objective EXAMM runs.
+- `core7_pareto_search_results.py`, `core7_pareto_search_compare.py` — the Pareto EXAMM search (validation MSE and
+  return) against core7-ret ([`PARETO_SEARCH_PROTOCOL.md`](PARETO_SEARCH_PROTOCOL.md)).
+- `core7_mo_frontier.py` — frontier of the earlier multi-objective EXAMM-MO runs.
 - `core7_frontier.py`, `main_core7.py`, `main_core7_protocol.py`, `make_original_rules_workbook.py`, `core7_table.py`,
   `core7_repeats.py` — the earlier RET protocol (`RET_protocol.md`), rule comparisons and per-repeat results.
 - `core7_paper_tables.py` — workbook of the selection-year experiment.

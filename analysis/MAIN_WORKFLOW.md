@@ -36,3 +36,11 @@ matching them needs raw CRSP data for the 200 stocks, which is not available.
 Code: paper_long_short.py (the paper's Algorithm 1), core7_genome_frontier.py (shared helper functions).
 Side experiments (not the main result): core7_genome_frontier*.py (Pareto genome frontier), core7_mo_frontier.py
 (multi-objective EXAMM), core7_frontier.py (trading-rule comparison), main_core7_protocol.py (trade every day).
+
+## Pareto EXAMM search (validation MSE and return) — see PARETO_SEARCH_PROTOCOL.md
+1. Runs (Anvil, EXAMM-refactor): scripts/base_run/core7_examm_yearly_ret_pareto.sh (--objectives mse,return), then copy
+   test_output/core7_examm_ret_pareto_<Y>/ to ~/EXAMM-Extended/test_output/ (quote the remote path in rsync).
+2. Forecasts (Mac, in ~/EXAMM-Extended): sh scripts/rnn_examples/evaluate_rnn_core7_pareto.sh   (every front genome, val + test)
+3. Backtest (Mac, in ~/Financial_toolbox): python3 core7_pareto_search_results.py   (validation check, choice, test)
+4. Comparison: python3 core7_pareto_search_compare.py -> results/core7_pareto_search_vs_ret.xlsx
+   (needs results/core7_main_repeats.csv from core7_main_results.py run with the corrected stock.py)
